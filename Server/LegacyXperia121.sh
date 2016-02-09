@@ -2,18 +2,22 @@
 source /media/adriandc/AndroidDev/Server/Vars.rc;
 
 # Phone Name
-export PhoneName="huashan";
+if [ ! -z "$1" ]; then 
+  export PhoneName="$1";
+else
+  export PhoneName="anzu";
+fi;
 BuildLog="$ScriptsLog.$PhoneName.CM121.log";
 
 # Launch Mode
 BuildMode="manual";
-if [ ! -z "$1" ]; then
-  BuildMode="$1";
+if [ ! -z "$2" ]; then
+  BuildMode="$2";
 fi;
 
 # Compilation Script
 cd $ScriptsDir;
-source ./android_auto_huashan_cm121.sh "automatic" "$BuildMode" 2>&1 | tee -a "$BuildLog";
+source ./android_auto_legacyxperia.sh "automatic" "$BuildMode,cm-12.1" 2>&1 | tee -a "$BuildLog";
 
 # Update script logs
 source $ServerDir/LogsSync.sh;

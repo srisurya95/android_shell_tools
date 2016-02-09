@@ -125,7 +125,9 @@ do
   if [ $adbPush == 1 ]; then
     echo "";
     adbPush=0;
-    sudo $ScriptDir/android_root_adb.sh;
+    if [[ ! "$1" =~ "noroot" ]]; then
+      sudo $ScriptDir/android_root_adb.sh;
+    fi;
     OutDir=$AndroidDir/out/target/product/$PhoneName;
     for FilePath in ${FilePaths[*]}
     do

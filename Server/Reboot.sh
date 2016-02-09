@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 source /media/adriandc/AndroidDev/Server/Vars.rc;
 
+# Work in Progress
+cd $LogsDir/;
+if [ ! -z $(find * -mtime -0,003 | tail -1) ]; then
+  exit;
+fi;
+
 # PushBullet Notification
 PushBulletComment="Server rebooting !";
 curl --header "Access-Token: $PushBulletToken" \

@@ -5,6 +5,11 @@ source $ScriptDir/android_set_variables.rc;
 
 cd $AndroidDir/;
 
+if [[ "$2" =~ "noccache" ]]; then
+  LocalCCache=$USE_CCACHE;
+  export USE_CCACHE=0;
+fi;
+
 echo "";
 echo " [ Loading the sources ]";
 echo "";
@@ -53,8 +58,9 @@ rm -f $ANDROID_PRODUCT_OUT/*$PhoneName-ota-*.zip;
 rm -f $ANDROID_PRODUCT_OUT/*.zip.md5sum;
 
 InstallLog=$(grep -a ".*target/product.*.zip" $LogFile);
-AndroidResult=$(printf "$InstallLog" | tail -1\
-              | sed "s/\x1B\[[0-9;]*[JKmsu]//g"\
+AndroidResult=$(printf "$InstallLog" | tail -1 \
+              | grep -i "$PhoneName" \
+              | sed "s/\x1B\[[0-9;]*[JKmsu]//g" \
               | sed "s/.*$PhoneName\/\([^\[]*.zip\).*/\1/g");
 
 if [ -z "$AndroidResult" ]; then
@@ -74,6 +80,10 @@ echo "   AndroidResult: $AndroidResult";
 echo "";
 echo " [ Done in $TimeDiff secs ]";
 echo "";
+
+if [[ "$2" =~ "noccache" ]]; then
+  export USE_CCACHE=$LocalCCache;
+fi;
 
 if [ -z "$1" ]; then
   nautilus $ANDROID_PRODUCT_OUT >/dev/null 2>&1;

@@ -11,5 +11,5 @@ echo "";
 ./prebuilts/misc/linux-x86/ccache/ccache -M $CCacheSize;
 echo "";
 
-watch -d "./prebuilts/misc/linux-x86/ccache/ccache" -s;
+watch -n 1 -d "./prebuilts/misc/linux-x86/ccache/ccache" -s;
 echo "";

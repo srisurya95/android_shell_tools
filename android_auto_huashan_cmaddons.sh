@@ -5,6 +5,11 @@ FullTimeStart=$(date +%s);
 BuildMode="$2";
 source $ScriptsDir/android_set_variables.rc;
 
+
+# Android Selection
+function android_selection() { source ./android_choose_rom.sh 1 y y; }
+android_selection;
+
 # Dependencies Deletion
 if ls "$AndroidDir/device/"*"/$PhoneName/"*.dependencies 1> /dev/null 2>&1; then
   rm "$AndroidDir/device/"*"/$PhoneName/"*.dependencies;
@@ -29,7 +34,13 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
 fi;
 
 # System Output Cleaning
-if [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
+if [[ "$BuildMode" =~ "clean" ]]; then
+  echo "";
+  echo " [ Cleaning outputs ]";
+  echo "";
+  cd $AndroidDir/;
+  make clean;
+elif [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
   echo "";
   echo " [ System - Wiping /system output ]";
   rm -rf "$OutDir/system";
@@ -52,36 +63,45 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
 fi;
 
 # Addons Build
-BuildSuccess=0;
+BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
-  source $ScriptsDir/android_make_addons.sh "automatic" "$2";
+  android_selection;
+  source $ScriptsDir/android_make_addons.sh "automatic" "$BuildMode";
 
   # ROM Successful
   if [ -f "$AndroidResult" ]; then
-    BuildSuccess=1;
+    BuildSuccess="true";
   fi;
 
   # ROM Upload
   if [[ ! "$BuildMode" =~ "local" ]]; then
     cd $ScriptsDir/;
     if [[ ! "$BuildMode" =~ "test" ]]; then
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan-CM-12.1" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/Addons-CM-12.1" "automatic";
     else
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Developers-ROMs" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development" "automatic";
     fi;
-    if [ $BuildSuccess ] && [[ "$BuildMode" =~ "rmoutdevice" ]] && [ -d "$OutDir" ]; then
+    if [ ! -z "$BuildSuccess" ] && [[ "$BuildMode" =~ "rmoutdevice" ]] && [ -d "$OutDir" ]; then
+      echo "";
+      echo " [ $PhoneName - Removing output folder ]";
+      echo "";
+      TargetFile=$(basename "$AndroidResult");
+      if [ -f "$TargetDir/$TargetFile" ]; then
+        rm -f "$TargetDir/$TargetFile";
+      fi;
+      cp "$AndroidResult" "$TargetDir/$TargetFile";
       rm -rf "$OutDir/";
     fi;
   fi;
 else
-  BuildSuccess=1;
+  BuildSuccess="true";
 fi;
 
 # Build Finished
 FullTimeDiff=$(($(date +%s)-$FullTimeStart));
 echo "";
-if [ $BuildSuccess ]; then
+if [ ! -z "$BuildSuccess" ]; then
   echo " [ Build : Success in $FullTimeDiff secs ]";
 else
   echo " [ Build : Fail in $FullTimeDiff secs ]";
