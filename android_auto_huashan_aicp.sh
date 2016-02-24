@@ -3,12 +3,14 @@ ScriptDir=$PWD;
 ScriptsDir=$ScriptDir;
 FullTimeStart=$(date +%s);
 BuildMode="$2";
-source $ScriptsDir/android_set_variables.rc;
-
 
 # Android Selection
 function android_selection() { source ./android_choose_rom.sh 2 n n; }
 android_selection;
+
+# Development Scripts
+source $ScriptsDir/android_set_variables.rc;
+
 
 # Dependencies Deletion
 if ls "$AndroidDir/device/"*"/$PhoneName/"*.dependencies 1> /dev/null 2>&1; then

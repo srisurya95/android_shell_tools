@@ -3,8 +3,6 @@ ScriptDir=$PWD;
 ScriptsDir=$ScriptDir;
 FullTimeStart=$(date +%s);
 BuildMode="$2";
-source $ScriptsDir/android_set_variables.rc;
-source $ScriptsDir/Bash/bash_legacyxperia.rc;
 
 # Android Selection
 if [[ "$BuildMode" =~ "cm-12.1" ]]; then
@@ -18,6 +16,10 @@ else
   function android_selection() { source ./android_choose_rom.sh 6 n n; }
 fi;
 android_selection;
+
+# Development Scripts
+source $ScriptsDir/android_set_variables.rc;
+source $ScriptsDir/Bash/bash_legacyxperia.rc;
 
 # Dependencies Deletion
 if ls "$AndroidDir/device/"*"/$PhoneName/"*.dependencies 1> /dev/null 2>&1; then

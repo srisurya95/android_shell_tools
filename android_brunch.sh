@@ -37,13 +37,18 @@ do
     rm -f "$OutDir/recovery/root/default.prop";
   fi;
   breakfast $PhoneName;
+  if [[ "$2" =~ "installclean" ]]; then
+    make installclean;
+  fi;
   brunch $PhoneName | tee $LogFile;
   echo "";
 
   if [ -z "$(grep -a "make failed to build" $LogFile | uniq)" ]; then
     LaunchBuild=0;
   elif [ ! -z "$1" ]; then
-    return;
+    LaunchBuild=0;
+    echo " Error detected...";
+    echo $(grep -a "make failed to build" $LogFile);
   else
     LaunchBuild=1;
     printf " Press Enter to restart the build... ";
