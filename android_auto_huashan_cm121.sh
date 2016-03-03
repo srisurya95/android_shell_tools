@@ -109,6 +109,6 @@ else
   echo " [ Build : Fail in $FullTimeDiff secs ]";
 fi;
 echo "";
-if [ -z "$2" ]; then
+if [ -z "$1" ]; then
   read key;
 fi;

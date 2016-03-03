@@ -36,11 +36,16 @@ do
   if [ -f "$OutDir/recovery/root/default.prop" ]; then
     rm -f "$OutDir/recovery/root/default.prop";
   fi;
-  breakfast $PhoneName;
   if [[ "$2" =~ "installclean" ]]; then
     make installclean;
   fi;
-  brunch $PhoneName | tee $LogFile;
+  if [[ "$2" =~ "otapackage" ]]; then
+    lunch aosp_$PhoneName-userdebug;
+    make -j8 otapackage | tee $LogFile;
+  else
+    breakfast $PhoneName;
+    brunch $PhoneName | tee $LogFile;
+  fi;
   echo "";
 
   if [ -z "$(grep -a "make failed to build" $LogFile | uniq)" ]; then
