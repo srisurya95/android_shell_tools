@@ -2,7 +2,11 @@
 source /media/adriandc/AndroidDev/Server/Vars.rc;
 
 # Phone Name
-export PhoneName="huashan";
+if [ ! -z "$2" ]; then
+  export PhoneName="$2";
+else
+  export PhoneName="huashan";
+fi;
 BuildLog="$ScriptsLog.$PhoneName.AOSPM.log";
 
 # Launch Mode

@@ -39,21 +39,22 @@ do
   if [[ "$2" =~ "installclean" ]]; then
     make installclean;
   fi;
+  TmpLogFile=$(mktemp);
   if [[ "$2" =~ "otapackage" ]]; then
     lunch aosp_$PhoneName-userdebug;
-    make -j8 otapackage | tee $LogFile;
+    make -j8 otapackage | tee $TmpLogFile;
   else
     breakfast $PhoneName;
-    brunch $PhoneName | tee $LogFile;
+    brunch $PhoneName | tee $TmpLogFile;
   fi;
   echo "";
 
-  if [ -z "$(grep -a "make failed to build" $LogFile | uniq)" ]; then
+  if [ -z "$(grep -a "make failed to build" $TmpLogFile | uniq)" ]; then
     LaunchBuild=0;
   elif [ ! -z "$1" ]; then
     LaunchBuild=0;
     echo " Error detected...";
-    echo $(grep -a "make failed to build" $LogFile);
+    echo $(grep -a "make failed to build" $TmpLogFile);
   else
     LaunchBuild=1;
     printf " Press Enter to restart the build... ";
@@ -67,11 +68,12 @@ done;
 rm -f $ANDROID_PRODUCT_OUT/*$PhoneName-ota-*.zip;
 rm -f $ANDROID_PRODUCT_OUT/*.zip.md5sum;
 
-InstallLog=$(grep -a ".*target/product.*.zip" $LogFile);
+InstallLog=$(grep -a ".*target/product.*.zip" $TmpLogFile);
 AndroidResult=$(printf "$InstallLog" | tail -1 \
               | grep -i "$PhoneName" \
               | sed "s/\x1B\[[0-9;]*[JKmsu]//g" \
               | sed "s/.*$PhoneName\/\([^\[]*.zip\).*/\1/g");
+rm -f $TmpLogFile;
 
 if [ -z "$AndroidResult" ]; then
   export AndroidResult="";

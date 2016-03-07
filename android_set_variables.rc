@@ -4,7 +4,7 @@ export GitUserName="";
 export AndroidROMs=("CyanogenMod" \
                     "AICP" \
                     "CM-13.0" \
-                    "AOSP" \
+                    "AOSP-CAF-6.0" \
                     "Nightly" \
                     "LegacyXperia-13.0" \
                     "LegacyXperia-12.1" \
@@ -13,7 +13,7 @@ export AndroidROMs=("CyanogenMod" \
 export AndroidSyncs=("CyanogenMod" \
                      "AICP" \
                      "CyanogenMod" \
-                     "AOSP" \
+                     "AOSP-CAF" \
                      "Nightly" \
                      "LegacyXperia-13.0" \
                      "LegacyXperia-12.1" \
@@ -22,7 +22,7 @@ export AndroidSyncs=("CyanogenMod" \
 export AndroidTags=("cm-12.1" \
                     "lp5.1" \
                     "cm-13.0" \
-                    "android-6.0.0_r1" \
+                    "cm-13.0" \
                     "cm-13.0" \
                     "cm-13.0" \
                     "cm-12.1" \
@@ -31,7 +31,7 @@ export AndroidTags=("cm-12.1" \
 export AndroidGits=("github" \
                     "aicp" \
                     "github" \
-                    "github" \
+                    "cm" \
                     "github" \
                     "github" \
                     "github" \
@@ -95,6 +95,7 @@ fi;
 
 export PathsDir="$PWD/Paths";
 export AndroidDir="$PathsDir/$AndroidROM/Repo";
+export BashDir="$PathsDir/Bash";
 export CCacheDir="$PathsDir/CCache";
 export GitHubDir="$PathsDir/GitHub";
 export TargetDir="$PathsDir/Target";

@@ -5,7 +5,7 @@ FullTimeStart=$(date +%s);
 BuildMode="$2";
 
 # Android Selection
-function android_selection() { source ./android_choose_rom.sh 1 y y; }
+function android_selection() { source ./android_choose_rom.sh 1 n n; }
 android_selection;
 
 # Development Scripts
@@ -20,19 +20,19 @@ fi;
 # Sources Updates
 if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   cd $ScriptsDir/;
-  source $ScriptsDir/android_sync_github.sh "automatic";
+  #source $ScriptsDir/android_sync_github.sh "automatic";
 
-  if [ ! -z "$AndroidDev" ]; then
-    cd $ScriptsDir/;
-    source $ScriptsDir/android_rebase.sh "automatic";
-  fi;
+  #if [ ! -z "$AndroidDev" ]; then
+    #cd $ScriptsDir/;
+    #source $ScriptsDir/android_rebase.sh "automatic";
+  #fi;
 
-  cd $ScriptsDir/;
-  if [ ! -z "$AndroidForce" ]; then
-    source $ScriptsDir/android_sync_force.sh "automatic";
-  else
-    source $ScriptsDir/android_sync.sh "automatic";
-  fi;
+  #cd $ScriptsDir/;
+  #if [ ! -z "$AndroidForce" ]; then
+  #  source $ScriptsDir/android_sync_force.sh "automatic";
+  #else
+  #  source $ScriptsDir/android_sync.sh "automatic";
+  #fi;
 fi;
 
 # System Output Cleaning
@@ -62,6 +62,10 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
                   git stash -u >/dev/null 2>&1; \
                   git reset --hard HEAD >/dev/null 2>&1;';
   repo sync --current-branch --detach --force-broken --force-sync;
+
+  # Additional changes
+  cd $AndroidDir/packages/apps/Mms/;
+  git fetch http://AdrianDC@review.cyanogenmod.org/a/CyanogenMod/android_packages_apps_Mms-caf refs/changes/75/129975/5 && git cherry-pick FETCH_HEAD;
 fi;
 
 # ROM Build

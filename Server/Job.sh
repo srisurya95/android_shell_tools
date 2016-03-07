@@ -20,29 +20,29 @@ case $1 in
      ${jobs[1]})  $ServerDir/HuashanCM130.sh "automatic" >$ScriptsJob 2>&1;;
      ${jobs[2]})  $ServerDir/HuashanAddons.sh "automatic" >$ScriptsJob 2>&1;;
      ${jobs[3]})  $ServerDir/HuashanAICP.sh "automatic" >$ScriptsJob 2>&1;;
-     ${jobs[4]})  $ServerDir/LegacyXperia130.sh "anzu" "automatic" >$ScriptsJob 2>&1;;
-     ${jobs[5]})  $ServerDir/LegacyXperia130.sh "legacyxperia" "synconly" >$ScriptsJob 2>&1;&
+     ${jobs[4]})  $ServerDir/LegacyXperia130.sh "automatic" "anzu" >$ScriptsJob 2>&1;;
+     ${jobs[5]})  $ServerDir/LegacyXperia130.sh "synconly" "legacyxperia" >$ScriptsJob 2>&1;&
      ${jobs[6]})  for device in ${DevicesLegacyXperia[@]}; do
-                    $ServerDir/LegacyXperia130.sh "$device" "automatic,nosync,rmoutdevice" >>$ScriptsJob 2>&1;
+                    $ServerDir/LegacyXperia130.sh "automatic,nosync,rmoutdevice" "$device" >>$ScriptsJob 2>&1;
                   done;;
-     ${jobs[7]})  $ServerDir/LegacyXperia121.sh "legacyxperia" "synconly" >$ScriptsJob 2>&1;
+     ${jobs[7]})  $ServerDir/LegacyXperia121.sh "synconly" "legacyxperia" >$ScriptsJob 2>&1;
                   for device in ${DevicesLegacyXperia[@]}; do
-                    $ServerDir/LegacyXperia121.sh "$device" "automatic,nosync,rmoutdevice" >>$ScriptsJob 2>&1;
+                    $ServerDir/LegacyXperia121.sh "automatic,nosync,rmoutdevice" "$device" >>$ScriptsJob 2>&1;
                   done;;
-     ${jobs[8]})  $ServerDir/LegacyXperia110.sh "legacyxperia" "synconly" >$ScriptsJob 2>&1;
+     ${jobs[8]})  $ServerDir/LegacyXperia110.sh "synconly" "legacyxperia" >$ScriptsJob 2>&1;
                   for device in ${DevicesLegacyXperia[@]}; do
-                    $ServerDir/LegacyXperia110.sh "$device" "automatic,nosync,rmoutdevice" >>$ScriptsJob 2>&1;
+                    $ServerDir/LegacyXperia110.sh "automatic,nosync,rmoutdevice" "$device" >>$ScriptsJob 2>&1;
                   done;;
-     ${jobs[9]})  $ServerDir/LegacyXperia130.sh "legacyxperia" "synconly" >$ScriptsJob 2>&1;
+     ${jobs[9]})  $ServerDir/LegacyXperia130.sh "synconly" "legacyxperia" >$ScriptsJob 2>&1;
                   for device in ${DevicesLegacyXperia[@]}; do
-                    $ServerDir/LegacyXperia130.sh "$device" "automatic,nosync,rmoutdevice,release" >>$ScriptsJob 2>&1;
+                    $ServerDir/LegacyXperia130.sh "automatic,nosync,rmoutdevice,release" "$device" >>$ScriptsJob 2>&1;
                   done;;
-     ${jobs[10]}) $ServerDir/LegacyXperia121.sh "legacyxperia" "synconly" >$ScriptsJob 2>&1;
+     ${jobs[10]}) $ServerDir/LegacyXperia121.sh "synconly" "legacyxperia" >$ScriptsJob 2>&1;
                   for device in ${DevicesLegacyXperia[@]}; do
-                    $ServerDir/LegacyXperia121.sh "$device" "automatic,nosync,noccache,rmoutdevice,release" >>$ScriptsJob 2>&1;
+                    $ServerDir/LegacyXperia121.sh "automatic,nosync,noccache,rmoutdevice,release" "$device" >>$ScriptsJob 2>&1;
                   done;;
      ${jobs[11]}) for device in anzu; do
-                    $ServerDir/LegacyXperia121.sh "$device" "automatic,nosync,noccache,rmoutdevice,release" >>$ScriptsJob 2>&1;
+                    $ServerDir/LegacyXperia121.sh "automatic,nosync,noccache,rmoutdevice,release" "$device" >>$ScriptsJob 2>&1;
                   done;;
      *) echo "";
         echo " Error: No Job selected from [${jobs[*]}]";

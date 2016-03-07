@@ -2,8 +2,8 @@
 source /media/adriandc/AndroidDev/Server/Vars.rc;
 
 # Phone Name
-if [ ! -z "$1" ]; then 
-  export PhoneName="$1";
+if [ ! -z "$2" ]; then
+  export PhoneName="$2";
 else
   export PhoneName="anzu";
 fi;
@@ -11,8 +11,8 @@ BuildLog="$ScriptsLog.$PhoneName.CM121.log";
 
 # Launch Mode
 BuildMode="manual";
-if [ ! -z "$2" ]; then
-  BuildMode="$2";
+if [ ! -z "$1" ]; then
+  BuildMode="$1";
 fi;
 
 # Compilation Script

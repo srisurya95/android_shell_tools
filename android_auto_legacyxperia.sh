@@ -19,7 +19,7 @@ android_selection;
 
 # Development Scripts
 source $ScriptsDir/android_set_variables.rc;
-source $ScriptsDir/Bash/bash_legacyxperia.rc;
+source $BashDir/android_legacyxperia.rc;
 
 # Dependencies Deletion
 if ls "$AndroidDir/device/"*"/$PhoneName/"*.dependencies 1> /dev/null 2>&1; then

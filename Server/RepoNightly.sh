@@ -13,7 +13,7 @@ cd $ScriptsDir;
 ScriptDir=$ScriptsDir;
 source $ScriptsDir/android_choose_rom.sh 3 y n 2>&1 | tee "$BuildLog";
 source $ScriptsDir/android_set_variables.rc;
-source $BashsDir/bash_huashan.rc;
+source $BashsDir/android_huashan.rc;
 
 # Sync Repo
 cd $AndroidDir/;

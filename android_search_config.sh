@@ -4,56 +4,59 @@ TimeStart=$(date +%s);
 source $ScriptDir/android_set_variables.rc;
 
 cd $AndroidDir/;
-pattern=":D";
-path="device/sony/$PhoneName/";
+if [ ! -z "$1" ]; then
+  pattern="$1";
+  if [ ! -z "$2" ]; then
+    path="$2";
+  else
+    path="";
+  fi;
+  pathEdit="false";
+else
+  pattern="";
+  path="";
+  pathEdit="";
+fi;
 
-while [ ! -z "$pattern" ];
-do
-
-  clear;
-  echo -e \\033c;
-  echo "";
-  echo " [ Pattern to search for ]";
-  echo "";
-  printf "  Config constant to search for : ";
+clear;
+echo -e \\033c;
+echo "";
+echo " [ Pattern to search for ]";
+echo "";
+printf "  Config constant to search for : ";
+if [ -z "$pattern" ]; then
   read -e pattern;
+else
+  echo "$pattern";
+fi;
 
-  if [ ! -z "$pattern" ]; then
+if [ ! -z "$pattern" ]; then
 
-    echo "";
-    echo "  Path to look into...";
-    printf "   * for all, or $path : ";
-    read -e pathEdit;
-
-    if [ ! -z "$pathEdit" ]; then
-      if [[ $pathEdit == "*" ]]; then
-        path="";
-      else
-        path=$pathEdit;
-      fi;
-    fi;
-
-    echo "";
-    echo "";
-    echo " [ Searching for '$pattern' in ./$path ]";
-    echo "";
-    TimeStart=$(date +%s);
-    grep --include={\*.mk,Kconfig} -nr ./$path -e "$pattern" | tee "$SearchFile";
-    # n : show found line numbers / w : entire words / l : files matching / r : recursive
-    TimeDiff=$(($(date +%s)-$TimeStart));
-
-    echo "";
-    echo "";
-    echo " [ Done in $TimeDiff secs ]";
-    echo "";
-    read key;
-
+  echo "";
+  echo "  Path to look into...";
+  printf "   Enter for all, example 'device/sony/$PhoneName/' : ";
+  if [ -z "$1" ]; then
+    read -e $path;
+  else
+    echo "$path";
   fi;
 
-done;
+  echo "";
+  echo "";
+  echo " [ Searching for '$pattern' in ./$path ]";
+  echo "";
+  TimeStart=$(date +%s);
+  GREP_COLORS='fn=1;1' grep --include={\*.mk,Kconfig,Makefile} -nr ./$path -e "$pattern" | tee "$SearchFile";
+  # n : show found line numbers / w : entire words / l : files matching / r : recursive
+  TimeDiff=$(($(date +%s)-$TimeStart));
 
-echo "";
-echo "";
-echo " [ Done ]";
-echo "";
-read key;
+  echo "";
+  echo "";
+  echo " [ Done in $TimeDiff secs ]";
+  echo "";
+
+fi;
+
+if [ -z "$1" ]; then
+  read key;
+fi;

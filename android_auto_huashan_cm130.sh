@@ -5,12 +5,12 @@ FullTimeStart=$(date +%s);
 BuildMode="$2";
 
 # Android Selection
-function android_selection() { source ./android_choose_rom.sh 3 y n; }
+function android_selection() { source ./android_choose_rom.sh 3 n n; }
 android_selection;
 
 # Development Scripts
 source $ScriptsDir/android_set_variables.rc;
-source $ScriptsDir/Bash/bash_huashan.rc;
+source $BashDir/android_huashan.rc;
 
 # Dependencies Deletion
 if ls "$AndroidDir/device/"*"/$PhoneName/"*.dependencies 1> /dev/null 2>&1; then
@@ -42,7 +42,7 @@ if [[ "$BuildMode" =~ "clean" ]]; then
   echo "";
   cd $AndroidDir/;
   make clean;
-elif [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
+elif [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nowipe" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
   echo "";
   echo " [ System - Wiping /system output ]";
   rm -rf "$OutDir/system";

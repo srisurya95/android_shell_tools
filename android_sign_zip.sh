@@ -1,7 +1,6 @@
 #!/bin/bash
 ScriptDir=$PWD;
 TimeStart=$(date +%s);
-source $ScriptDir/android_set_variables.rc;
 
 echo "";
 echo " [ Drag & Drop the zip file ]";
