@@ -5,6 +5,7 @@ export AndroidROMs=("CyanogenMod" \
                     "AICP" \
                     "CM-13.0" \
                     "AOSP-CAF-6.0" \
+                    "AOSP-RRO-6.0" \
                     "Nightly" \
                     "LegacyXperia-13.0" \
                     "LegacyXperia-12.1" \
@@ -14,6 +15,7 @@ export AndroidSyncs=("CyanogenMod" \
                      "AICP" \
                      "CyanogenMod" \
                      "AOSP-CAF" \
+                     "AOSP-RRO" \
                      "Nightly" \
                      "LegacyXperia-13.0" \
                      "LegacyXperia-12.1" \
@@ -22,7 +24,8 @@ export AndroidSyncs=("CyanogenMod" \
 export AndroidTags=("cm-12.1" \
                     "lp5.1" \
                     "cm-13.0" \
-                    "cm-13.0" \
+                    "mm6.0" \
+                    "marshmallow" \
                     "cm-13.0" \
                     "cm-13.0" \
                     "cm-12.1" \
@@ -32,6 +35,7 @@ export AndroidGits=("github" \
                     "aicp" \
                     "github" \
                     "cm" \
+                    "github" \
                     "github" \
                     "github" \
                     "github" \

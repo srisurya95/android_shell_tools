@@ -36,7 +36,7 @@ sudo echo "";
 LaunchBuild=1;
 if [[ "$1" =~ "test" ]]; then
   LaunchBuild=0;
-else
+elif [[ ! "$1" =~ "ready" ]]; then
   cd $AndroidDir/;
   source ./build/envsetup.sh;
   croot;

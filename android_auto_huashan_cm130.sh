@@ -42,7 +42,7 @@ if [[ "$BuildMode" =~ "clean" ]]; then
   echo "";
   cd $AndroidDir/;
   make clean;
-elif [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nowipe" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
+elif [[ ! "$BuildMode" =~ "nowipe" ]] && [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
   echo "";
   echo " [ System - Wiping /system output ]";
   rm -rf "$OutDir/system";

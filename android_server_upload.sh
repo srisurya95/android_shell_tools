@@ -16,23 +16,22 @@ elif [ -f ~/.bash_android.basketbuild.main.rc ]; then
   source ~/.bash_android.basketbuild.main.rc;
 fi;
 
-echo "";
-echo " [ Uploading to the server - User '$UploadUserName' ]";
-echo "";
-
 SendFile="$1";
+if [ ! -z "$2" ]; then
+  UploadFolder="$2";
+else
+  UploadFolder="Android-Developers";
+fi;
+
+echo "";
+echo " [ Uploading to the server - User '$UploadUserName' - Path '$UploadFolder' ]";
+echo "";
 if [ ! -z "$SendFile" ] && [ -f "$SendFile" ] && [ ! -z "$UploadPassword" ]; then
 
   SendFileName=$(basename "$SendFile");
   SendFileExt=${SendFileName##*.};
   SendFileSize=$(stat -c "%s" "$SendFile");
   SendFileType='';
-
-  if [ ! -z "$2" ]; then
-    UploadFolder="$2";
-  else
-    UploadFolder="Android-Developers";
-  fi;
 
   if [[ "$SendFileExt" =~ 'zip' ]]; then
     SendFileType='application/zip';

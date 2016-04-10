@@ -40,9 +40,12 @@ do
     make installclean;
   fi;
   TmpLogFile=$(mktemp);
-  if [[ "$2" =~ "otapackage" ]]; then
+  if [[ "$2" =~ "aosprro" ]]; then
     lunch aosp_$PhoneName-userdebug;
-    make -j8 otapackage | tee $TmpLogFile;
+    make -j$(grep -c ^processor /proc/cpuinfo) bacon | tee $TmpLogFile;
+  elif [[ "$2" =~ "otapackage" ]]; then
+    lunch aosp_$PhoneName-userdebug;
+    make -j$(grep -c ^processor /proc/cpuinfo) otapackage | tee $TmpLogFile;
   else
     breakfast $PhoneName;
     brunch $PhoneName | tee $TmpLogFile;
@@ -68,9 +71,11 @@ done;
 rm -f $ANDROID_PRODUCT_OUT/*$PhoneName-ota-*.zip;
 rm -f $ANDROID_PRODUCT_OUT/*.zip.md5sum;
 
-InstallLog=$(grep -a ".*target/product.*.zip" $TmpLogFile);
-AndroidResult=$(printf "$InstallLog" | tail -1 \
+InstallLog=$(grep -ai ".*target/product.*\.zip" $TmpLogFile);
+AndroidResult=$(printf "$InstallLog" \
               | grep -i "$PhoneName" \
+              | grep -i "$(date +%Y)" \
+              | tail -1 \
               | sed "s/\x1B\[[0-9;]*[JKmsu]//g" \
               | sed "s/.*$PhoneName\/\([^\[]*.zip\).*/\1/g");
 rm -f $TmpLogFile;
