@@ -64,8 +64,8 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   repo sync --current-branch --detach --force-broken --force-sync;
 
   # Additional changes
-  cd $AndroidDir/packages/apps/Mms/;
-  git fetch http://AdrianDC@review.cyanogenmod.org/a/CyanogenMod/android_packages_apps_Mms-caf refs/changes/75/129975/5 && git cherry-pick FETCH_HEAD;
+  # cd $AndroidDir/packages/apps/Mms/;
+  # git fetch http://AdrianDC@review.cyanogenmod.org/a/CyanogenMod/android_packages_apps_Mms-caf refs/changes/75/129975/5 && git cherry-pick FETCH_HEAD;
 fi;
 
 # ROM Build
