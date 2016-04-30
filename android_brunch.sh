@@ -5,7 +5,7 @@ source $ScriptDir/android_set_variables.rc;
 
 cd $AndroidDir/;
 
-if [[ "$2" =~ "noccache" ]]; then
+if [[ "$1" =~ "noccache" ]]; then
   LocalCCache=$USE_CCACHE;
   export USE_CCACHE=0;
 fi;
@@ -36,14 +36,14 @@ do
   if [ -f "$OutDir/recovery/root/default.prop" ]; then
     rm -f "$OutDir/recovery/root/default.prop";
   fi;
-  if [[ "$2" =~ "installclean" ]]; then
+  if [[ "$1" =~ "installclean" ]]; then
     make installclean;
   fi;
   TmpLogFile=$(mktemp);
-  if [[ "$2" =~ "aosprro" ]]; then
+  if [[ "$1" =~ "aosprro" ]]; then
     lunch aosp_$PhoneName-userdebug;
     make -j$(grep -c ^processor /proc/cpuinfo) bacon | tee $TmpLogFile;
-  elif [[ "$2" =~ "otapackage" ]]; then
+  elif [[ "$1" =~ "otapackage" ]]; then
     lunch aosp_$PhoneName-userdebug;
     make -j$(grep -c ^processor /proc/cpuinfo) otapackage | tee $TmpLogFile;
   else
@@ -98,7 +98,7 @@ echo "";
 echo " [ Done in $TimeDiff secs ]";
 echo "";
 
-if [[ "$2" =~ "noccache" ]]; then
+if [[ "$1" =~ "noccache" ]]; then
   export USE_CCACHE=$LocalCCache;
 fi;
 

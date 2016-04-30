@@ -18,8 +18,3 @@ if [ ! -z $TerminalPID ] && stat /proc/$TerminalPID/fd/0 &>/dev/null; then
 else
   cat ScriptsJob;
 fi;
-
-# Script End
-if [[ "$1" == "" ]]; then
-  read key;
-fi;

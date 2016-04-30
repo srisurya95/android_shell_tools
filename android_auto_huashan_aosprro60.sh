@@ -2,7 +2,7 @@
 ScriptDir=$PWD;
 ScriptsDir=$ScriptDir;
 FullTimeStart=$(date +%s);
-BuildMode="$2";
+BuildMode="$1";
 
 # Android Selection
 function android_selection() { source ./android_choose_rom.sh 5 n n; }
@@ -30,6 +30,11 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   git reset --hard FETCH_HEAD;
 fi;
 
+
+
+
+
+
 # System Output Cleaning
 if [[ "$BuildMode" =~ "clean" ]]; then
   echo "";
@@ -51,7 +56,7 @@ BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
-  source $ScriptsDir/android_brunch.sh "automatic" "$BuildMode,aosprro";
+  source $ScriptsDir/android_brunch.sh "automatic,$BuildMode,aosprro";
 
   # ROM Successful
   if [ -f "$AndroidResult" ]; then
@@ -62,9 +67,9 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   if [[ ! "$BuildMode" =~ "local" ]]; then
     cd $ScriptsDir/;
     if [[ ! "$BuildMode" =~ "test" ]]; then
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/AOSP-RRO-6.0" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/AOSP-RRO-6.0";
     else
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development";
     fi;
     if [ ! -z "$BuildSuccess" ] && [[ "$BuildMode" =~ "rmoutdevice" ]] && [ -d "$OutDir" ]; then
       echo "";
@@ -91,6 +96,3 @@ else
   echo " [ Build : Fail in $FullTimeDiff secs ]";
 fi;
 echo "";
-if [ -z "$1" ]; then
-  read key;
-fi;

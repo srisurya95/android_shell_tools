@@ -17,7 +17,7 @@ fi;
 
 # Compilation Script
 cd $ScriptsDir;
-source ./android_auto_legacyxperia.sh "automatic" "$BuildMode,cm-13.0" 2>&1 | tee -a "$BuildLog";
+source ./android_auto_legacyxperia.sh "$BuildMode,cm-13.0" 2>&1 | tee -a "$BuildLog";
 
 # Update script logs
 source $ServerDir/LogsSync.sh;
@@ -31,8 +31,3 @@ else
 fi;
 notify-send "$PushBulletComment";
 source $ServerDir/PushBullet.sh;
-
-# CronTab End
-if [ -z "$1" ]; then
-  read key;
-fi;

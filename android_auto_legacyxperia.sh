@@ -2,7 +2,7 @@
 ScriptDir=$PWD;
 ScriptsDir=$ScriptDir;
 FullTimeStart=$(date +%s);
-BuildMode="$2";
+BuildMode="$1";
 
 # Android Selection
 if [[ "$BuildMode" =~ "cm-11.0" ]]; then
@@ -57,7 +57,7 @@ BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
-  source $ScriptsDir/android_brunch.sh "automatic" "$BuildMode";
+  source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
 
   # ROM Successful
   if [ -f "$AndroidResult" ]; then
@@ -72,9 +72,9 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
       source $ScriptsDir/android_server_upload.sh "$AndroidResult" "$PhoneName/$BuildBranch" "legacyxperia";
       source $ScriptsDir/android_server_upload.sh "$AndroidResult.md5sum" "$PhoneName/$BuildBranch" "legacyxperia";
     elif [[ ! "$BuildMode" =~ "test" ]]; then
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "LegacyXperia/$PhoneName/$BuildBranch" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "LegacyXperia/$PhoneName/$BuildBranch";
     else
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development";
     fi;
     if [ ! -z "$BuildSuccess" ] && [[ "$BuildMode" =~ "rmoutdevice" ]] && [ -d "$OutDir" ]; then
       echo "";
@@ -102,6 +102,3 @@ else
   echo " [ Build : Fail in $FullTimeDiff secs ]";
 fi;
 echo "";
-if [ -z "$1" ]; then
-  read key;
-fi;

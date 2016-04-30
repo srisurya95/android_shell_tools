@@ -10,7 +10,7 @@ export UploadPassword="";
 export UploadFolder="Path/To/Folder";
 
 # Create  ~/.bash_android.basketbuild.**name**.rc with the exports to override the credentials
-if [ -f ~/.bash_android.basketbuild.$3.rc ]; then
+if [ ! -z "$3" ] && [ -f ~/.bash_android.basketbuild.$3.rc ]; then
   source ~/.bash_android.basketbuild.$3.rc;
 elif [ -f ~/.bash_android.basketbuild.main.rc ]; then
   source ~/.bash_android.basketbuild.main.rc;
@@ -20,7 +20,7 @@ SendFile="$1";
 if [ ! -z "$2" ]; then
   UploadFolder="$2";
 else
-  UploadFolder="Android-Developers";
+  UploadFolder="Development";
 fi;
 
 echo "";
@@ -76,9 +76,4 @@ TimeDiff=$(($(date +%s)-$TimeStart));
 echo "";
 echo "";
 echo " [ Done in $TimeDiff secs ]";
-echo "";
-
-if [ -z "$3" ]; then
-  read key;
-fi;
 echo "";

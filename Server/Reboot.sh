@@ -16,4 +16,3 @@ curl --header "Access-Token: $PushBulletToken" \
 
 # Reboot the server
 /sbin/shutdown -r now;
-

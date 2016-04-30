@@ -2,7 +2,7 @@ export GitEMail="";
 export GitUserName="";
 
 export AndroidROMs=("CyanogenMod" \
-                    "AICP" \
+                    "AICP-6.0" \
                     "CM-13.0" \
                     "AOSP-CAF-6.0" \
                     "AOSP-RRO-6.0" \
@@ -22,7 +22,7 @@ export AndroidSyncs=("CyanogenMod" \
                      "LegacyXperia-11.0" \
                      );
 export AndroidTags=("cm-12.1" \
-                    "lp5.1" \
+                    "mm6.0" \
                     "cm-13.0" \
                     "mm6.0" \
                     "marshmallow" \

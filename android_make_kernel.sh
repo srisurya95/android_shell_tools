@@ -19,10 +19,13 @@ MakeClean=( \
            );
 FilePaths=( \
            "system/lib/modules/*" \
+           "system/lib/libhardware_legacy.so" \
            "system/etc/general_file_contexts" \
            "system/etc/general_property_contexts" \
            "system/etc/general_seapp_contexts" \
            "system/etc/general_service_contexts" \
+           "system/etc/init.qcom.bt.sh" \
+           "system/etc/init.qcom.fm.sh" \
            "system/etc/security/mac_permissions.xml" \
            "system/etc/sepolicy.recovery" \
            );

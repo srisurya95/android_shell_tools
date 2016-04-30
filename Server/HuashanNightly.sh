@@ -1,11 +1,14 @@
 #!/bin/bash
 source /media/adriandc/AndroidDev/Server/Vars.rc;
-BuildLog="$ScriptsLog.NightlySync.log";
+
+# Phone Name
+export PhoneName="huashan";
+BuildLog="$ScriptsLog.$PhoneName.NightlySync.log";
 
 # Launch Mode
 BuildMode="manual";
 if [ ! -z "$1" ]; then
-  BuildMode="$@";
+  BuildMode="$1";
 fi;
 
 # Choose ROM
@@ -20,14 +23,7 @@ cd $AndroidDir/;
 reposa "$BuildMode";
 
 # Update script logs
-if [[ "$BuildMode" =~ "automatic" ]]; then
-  source $ServerDir/LogsSync.sh;
-fi;
+source $ServerDir/LogsSync.sh;
 
 # Notification
 notify-send "Done syncing !";
-
-# CronTab End
-if [ -z "$1" ]; then
-  read key;
-fi;

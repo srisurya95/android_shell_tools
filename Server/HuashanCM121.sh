@@ -13,7 +13,7 @@ fi;
 
 # Compilation Script
 cd $ScriptsDir;
-source ./android_auto_huashan_cm121.sh "automatic" "$BuildMode" 2>&1 | tee -a "$BuildLog";
+source ./android_auto_huashan_cm121.sh "$BuildMode" 2>&1 | tee -a "$BuildLog";
 
 # Update script logs
 source $ServerDir/LogsSync.sh;
@@ -27,8 +27,3 @@ else
 fi;
 notify-send "$PushBulletComment";
 source $ServerDir/PushBullet.sh;
-
-# CronTab End
-if [ -z "$1" ]; then
-  read key;
-fi;

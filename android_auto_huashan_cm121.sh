@@ -2,7 +2,7 @@
 ScriptDir=$PWD;
 ScriptsDir=$ScriptDir;
 FullTimeStart=$(date +%s);
-BuildMode="$2";
+BuildMode="$1";
 
 # Android Selection
 function android_selection() { source ./android_choose_rom.sh 1 n n; }
@@ -20,20 +20,20 @@ fi;
 # Sources Updates
 if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   cd $ScriptsDir/;
-  #source $ScriptsDir/android_sync_github.sh "automatic";
-
-  #if [ ! -z "$AndroidDev" ]; then
-    #cd $ScriptsDir/;
-    #source $ScriptsDir/android_rebase.sh "automatic";
-  #fi;
-
-  #cd $ScriptsDir/;
-  #if [ ! -z "$AndroidForce" ]; then
-  #  source $ScriptsDir/android_sync_force.sh "automatic";
-  #else
-  #  source $ScriptsDir/android_sync.sh "automatic";
-  #fi;
 fi;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # System Output Cleaning
 if [[ "$BuildMode" =~ "clean" ]]; then
@@ -73,7 +73,7 @@ BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
-  source $ScriptsDir/android_brunch.sh "automatic" "$BuildMode";
+  source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
 
   # ROM Successful
   if [ -f "$AndroidResult" ]; then
@@ -84,9 +84,9 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   if [[ ! "$BuildMode" =~ "local" ]]; then
     cd $ScriptsDir/;
     if [[ ! "$BuildMode" =~ "test" ]]; then
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/CyanogenMod-12.1" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/CyanogenMod-12.1";
     else
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development";
     fi;
     if [ ! -z "$BuildSuccess" ] && [[ "$BuildMode" =~ "rmoutdevice" ]] && [ -d "$OutDir" ]; then
       echo "";
@@ -113,6 +113,3 @@ else
   echo " [ Build : Fail in $FullTimeDiff secs ]";
 fi;
 echo "";
-if [ -z "$1" ]; then
-  read key;
-fi;

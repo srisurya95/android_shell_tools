@@ -2,10 +2,10 @@
 ScriptDir=$PWD;
 ScriptsDir=$ScriptDir;
 FullTimeStart=$(date +%s);
-BuildMode="$2";
+BuildMode="$1";
 
 # Android Selection
-function android_selection() { source ./android_choose_rom.sh 1 y y; }
+function android_selection() { source ./android_choose_rom.sh 2 n n; }
 android_selection;
 
 # Development Scripts
@@ -15,40 +15,6 @@ source $ScriptsDir/android_set_variables.rc;
 # Dependencies Deletion
 if ls "$AndroidDir/device/"*"/$PhoneName/"*.dependencies 1> /dev/null 2>&1; then
   rm "$AndroidDir/device/"*"/$PhoneName/"*.dependencies;
-fi;
-
-# Sources Updates
-if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
-  cd $ScriptsDir/;
-  source $ScriptsDir/android_sync_github.sh "automatic";
-
-  if [ ! -z "$AndroidDev" ]; then
-    cd $ScriptsDir/;
-    source $ScriptsDir/android_rebase.sh "automatic";
-  fi;
-
-  cd $ScriptsDir/;
-  if [ ! -z "$AndroidForce" ]; then
-    source $ScriptsDir/android_sync_force.sh "automatic";
-  else
-    source $ScriptsDir/android_sync.sh "automatic";
-  fi;
-fi;
-
-# System Output Cleaning
-if [[ "$BuildMode" =~ "clean" ]]; then
-  echo "";
-  echo " [ Cleaning outputs ]";
-  echo "";
-  cd $AndroidDir/;
-  make clean;
-elif [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
-  echo "";
-  echo " [ System - Wiping /system output ]";
-  rm -rf "$OutDir/system";
-  echo "";
-  echo "Output folder '/system' deleted";
-  echo "";
 fi;
 
 # Sources Sync
@@ -62,14 +28,35 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
                   git stash -u >/dev/null 2>&1; \
                   git reset --hard HEAD >/dev/null 2>&1;';
   repo sync --current-branch --detach --force-broken --force-sync;
+
+  croot;
+  cd ./hardware/qcom/audio-caf/msm8960/; echo "";
+  git fetch https://github.com/arco/android_hardware_qcom_audio.git cm-13.0-caf-8960;
+  git reset --hard FETCH_HEAD;
 fi;
 
-# Addons Build
+# System Output Cleaning
+if [[ "$BuildMode" =~ "clean" ]]; then
+  echo "";
+  echo " [ Cleaning outputs ]";
+  echo "";
+  cd $AndroidDir/;
+  make clean;
+elif [[ ! "$BuildMode" =~ "nowipe" ]] && [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
+  echo "";
+  echo " [ System - Wiping /system output ]";
+  rm -rf "$OutDir/system";
+  echo "";
+  echo "Output folder '/system' deleted";
+  echo "";
+fi;
+
+# ROM Build
 BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
-  source $ScriptsDir/android_make_addons.sh "automatic" "$BuildMode";
+  source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
 
   # ROM Successful
   if [ -f "$AndroidResult" ]; then
@@ -80,9 +67,9 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   if [[ ! "$BuildMode" =~ "local" ]]; then
     cd $ScriptsDir/;
     if [[ ! "$BuildMode" =~ "test" ]]; then
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/Addons-CM-12.1" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/AICP-6.0";
     else
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development" "automatic";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development";
     fi;
     if [ ! -z "$BuildSuccess" ] && [[ "$BuildMode" =~ "rmoutdevice" ]] && [ -d "$OutDir" ]; then
       echo "";
@@ -109,6 +96,3 @@ else
   echo " [ Build : Fail in $FullTimeDiff secs ]";
 fi;
 echo "";
-if [ -z "$1" ]; then
-  read key;
-fi;
