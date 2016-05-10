@@ -23,7 +23,7 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   echo " [ Syncing $PhoneName repositories ]";
   echo "";
   cd $AndroidDir/;
-  reposa;
+  reposa "$BuildMode";
 fi;
 
 
@@ -56,10 +56,14 @@ BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
-  source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
+  if [[ "$BuildMode" =~ "kernel" ]]; then
+    source $ScriptsDir/android_make_kernel.sh "release" "cm-13.0-";
+  else
+    source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
+  fi;
 
   # ROM Successful
-  if [ -f "$AndroidResult" ]; then
+  if [ ! -z "$AndroidResult" ] && [ -f "$AndroidResult" ]; then
     BuildSuccess="true";
   fi;
 

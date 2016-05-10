@@ -32,7 +32,7 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   echo " [ Syncing $PhoneName repositories ]";
   echo "";
   cd $AndroidDir/;
-  reposalx $BuildBranch;
+  reposalx $BuildBranch "$BuildMode";
 fi;
 
 
@@ -60,7 +60,7 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
 
   # ROM Successful
-  if [ -f "$AndroidResult" ]; then
+  if [ ! -z "$AndroidResult" ] && [ -f "$AndroidResult" ]; then
     BuildSuccess="true";
   fi;
 

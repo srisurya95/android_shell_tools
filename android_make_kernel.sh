@@ -29,13 +29,21 @@ FilePaths=( \
            "system/etc/security/mac_permissions.xml" \
            "system/etc/sepolicy.recovery" \
            );
-KernelFile="kernel-"$(date +'%Y%m%d')"-$PhoneName.zip";
+
+if [ ! -z "$2" ]; then
+  KernelFile="$2"$(date +'%Y%m%d')"-kernel-$PhoneName.zip";
+else
+  KernelFile="kernel-"$(date +'%Y%m%d')"-$PhoneName.zip";
+fi;
 
 if [ -f "$TargetDir/$KernelFile" ]; then
   rm -f "$TargetDir/$KernelFile";
 fi;
 
-sudo echo "";
+if [[ ! "$1" =~ "release" ]]; then
+  sudo echo "";
+fi;
+
 LaunchBuild=1;
 if [[ "$1" =~ "test" ]]; then
   LaunchBuild=0;
@@ -43,7 +51,11 @@ elif [[ ! "$1" =~ "ready" ]]; then
   cd $AndroidDir/;
   source ./build/envsetup.sh;
   croot;
-  breakfast $PhoneName;
+  if [[ "$1" =~ "otapackage" ]]; then
+    lunch aosp_$PhoneName-userdebug;
+  else
+    breakfast $PhoneName;
+  fi;
 fi;
 
 if [[ "$1" =~ "clean" ]]; then
@@ -60,19 +72,20 @@ do
   echo "";
   echo " [ Making the requested libraries ]";
   echo "";
-  sudo echo "";
+  echo "";
   cd $OutDir/;
   rm -fv ${MakeClean[*]};
   cd $AndroidDir/;
-  mmm -B -j8 ./external/sepolicy/ | tee $LogFile;
+  TmpLogFile=$(mktemp);
+  mmm -B -j8 ./external/sepolicy/ | tee $TmpLogFile;
   if [[ "$1" =~ "fast" ]]; then
-    mms bootimage | tee -a $LogFile;
+    mms bootimage | tee -a $TmpLogFile;
   else
-    mka bootimage | tee -a $LogFile;
+    mka bootimage | tee -a $TmpLogFile;
   fi;
   echo "";
 
-  if [ -z "$(grep -a "make failed to build" $LogFile | uniq)" ]; then
+  if [ -z "$(grep -a "make failed to build" $TmpLogFile | uniq)" ]; then
     LaunchBuild=0;
   else
     LaunchBuild=1;
@@ -81,6 +94,7 @@ do
     echo "";
     echo "";
   fi;
+  rm -f $TmpLogFile;
 
 done;
 
@@ -109,55 +123,58 @@ SignApkDir=$ScriptDir/android_signapk;
 java -jar "$SignApkDir/signapk-cm121.jar" -w "$SignApkDir/testkey.x509.pem" "$SignApkDir/testkey.pk8" "$TargetDir/$KernelFile.unsigned.zip" "$TargetDir/$KernelFile";
 rm -f "$TargetDir/$KernelFile.unsigned.zip";
 
-export AndroidResult=$TargetDir/$KernelFile;
+export AndroidResult="$TargetDir/$KernelFile";
 
-adbPush=1;
-while [ $adbPush != 0 ];
-do
-  echo "";
-  echo "";
-  echo " [ Upload new modules files - Debugging USB ]";
-  echo "";
-  printf "  Proceed with the modules (Y/n) ? ";
-  read key;
-  if [[ "$key" == "n" || "$key" == "N" ]]; then
+if [[ ! "$1" =~ "release" ]]; then
+  adbPush=1;
+  while [ $adbPush != 0 ];
+  do
     echo "";
-    adbPush=0;
-  fi;
-
-  if [ $adbPush == 1 ]; then
     echo "";
-    adbPush=0;
-    if [[ ! "$1" =~ "noroot" ]]; then
-      sudo $ScriptDir/android_root_adb.sh;
+    echo " [ Upload new modules files - Debugging USB ]";
+    echo "";
+    printf "  Proceed with the modules (Y/n) ? ";
+    read key;
+    if [[ "$key" == "n" || "$key" == "N" ]]; then
+      echo "";
+      adbPush=0;
     fi;
-    OutDir=$AndroidDir/out/target/product/$PhoneName;
-    for FilePath in ${FilePaths[*]}
-    do
-      adb push "$OutDir/$FilePath" "/$FilePath";
-      if [ $? != 0 ]; then adbPush=1; fi;
-    done;
-  fi;
 
-  if [ $adbPush == 0 ]; then
-    echo "";
-    echo " Rebooting to bootloader...";
-    echo "";
-    sleep 5;
-    adb reboot bootloader;
-  fi;
-done;
+    if [ $adbPush == 1 ]; then
+      echo "";
+      adbPush=0;
+      if [[ ! "$1" =~ "noroot" ]]; then
+        sudo $ScriptDir/android_root_adb.sh;
+      fi;
+      OutDir=$AndroidDir/out/target/product/$PhoneName;
+      for FilePath in ${FilePaths[*]}
+      do
+        adb push "$OutDir/$FilePath" "/$FilePath";
+        if [ $? != 0 ]; then adbPush=1; fi;
+      done;
+    fi;
+
+    if [ $adbPush == 0 ]; then
+      echo "";
+      echo " Rebooting to bootloader...";
+      echo "";
+      sleep 5;
+      adb reboot bootloader;
+    fi;
+  done;
+
+  echo "";
+  echo "";
+  echo " [ Upload new kernel - Bootloader USB ]";
+  echo "";
+  echo "";
+  cd $OutDir/;
+  sudo fastboot flash boot "$KernelPath";
+  sudo fastboot reboot;
+fi;
 
 echo "";
-echo "";
-echo " [ Upload new kernel - Bootloader USB ]";
-echo "";
-echo "";
-cd $OutDir/;
-sudo fastboot flash boot "$KernelPath";
-sudo fastboot reboot;
-
+echo "   AndroidResult: $AndroidResult";
 echo "";
 echo " [ Done in $TimeDiff secs ]";
 echo "";
-read key;

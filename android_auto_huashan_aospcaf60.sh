@@ -17,10 +17,12 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   echo " [ Syncing $PhoneName repositories ]";
   echo "";
   cd $AndroidDir/;
-  repo forall -c 'echo "Cleaning project ${REPO_PROJECT}"; \
-                  git rebase --abort >/dev/null 2>&1; \
-                  git stash -u >/dev/null 2>&1; \
-                  git reset --hard HEAD >/dev/null 2>&1;';
+  if [[ ! "$BuildMode" =~ "unsafe" ]]; then
+    repo forall -c 'echo "Cleaning project ${REPO_PROJECT}"; \
+                    git rebase --abort >/dev/null 2>&1; \
+                    git stash -u >/dev/null 2>&1; \
+                    git reset --hard HEAD >/dev/null 2>&1;';
+  fi;
   repo sync -j8 --current-branch --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags;
   source ./build/envsetup.sh;
 
@@ -43,11 +45,6 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   git cherry-pick a57098bb9ee2a3d1beb93bb52fa0873f53e0625a; # charger: Show all charger animations
   git cherry-pick 75bf203c6b35e965ff9ee7a0bc85b3b5fb08bf80; # healthd: allow custom charger
   git cherry-pick 0951fb068e73ae448a1eeea12a0f1d334137b876; # Partially revert "healthd: allow custom charger"
-
-  croot;
-  cd ./hardware/qcom/audio-caf/msm8960/; echo "";
-  git fetch https://github.com/arco/android_hardware_qcom_audio.git cm-13.0-caf-8960;
-  git reset --hard FETCH_HEAD;
 
   croot;
   sed -i "s/\(ALOGV(\"message received msg=%d, ext1=%d, ext2=%d, obj=\)%x\(\",\)/\1%p\2/g" "frameworks/base/cmds/bootanimation/BootAnimation.cpp";
@@ -74,10 +71,14 @@ BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
-  source $ScriptsDir/android_brunch.sh "automatic,$BuildMode,otapackage";
+  if [[ "$BuildMode" =~ "kernel" ]]; then
+    source $ScriptsDir/android_make_kernel.sh "release,otapackage" "aosp-mm6.0.1-";
+  else
+    source $ScriptsDir/android_brunch.sh "automatic,$BuildMode,otapackage";
+  fi;
 
   # ROM Successful
-  if [ -f "$AndroidResult" ]; then
+  if [ ! -z "$AndroidResult" ] && [ -f "$AndroidResult" ]; then
     BuildSuccess="true";
   fi;
 

@@ -57,10 +57,12 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   echo " [ Syncing $PhoneName repositories ]";
   echo "";
   cd $AndroidDir/;
-  repo forall -c 'echo "Cleaning project ${REPO_PROJECT}"; \
-                  git rebase --abort >/dev/null 2>&1; \
-                  git stash -u >/dev/null 2>&1; \
-                  git reset --hard HEAD >/dev/null 2>&1;';
+  if [[ ! "$BuildMode" =~ "unsafe" ]]; then
+    repo forall -c 'echo "Cleaning project ${REPO_PROJECT}"; \
+                    git rebase --abort >/dev/null 2>&1; \
+                    git stash -u >/dev/null 2>&1; \
+                    git reset --hard HEAD >/dev/null 2>&1;';
+  fi;
   repo sync --current-branch --detach --force-broken --force-sync;
 
   # Additional changes
@@ -73,10 +75,14 @@ BuildSuccess="";
 if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
-  source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
+  if [[ "$BuildMode" =~ "kernel" ]]; then
+    source $ScriptsDir/android_make_kernel.sh "release" "cm-12.1-";
+  else
+    source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
+  fi;
 
   # ROM Successful
-  if [ -f "$AndroidResult" ]; then
+  if [ ! -z "$AndroidResult" ] && [ -f "$AndroidResult" ]; then
     BuildSuccess="true";
   fi;
 
