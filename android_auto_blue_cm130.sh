@@ -5,7 +5,7 @@ FullTimeStart=$(date +%s);
 BuildMode="$1";
 
 # Android Selection
-function android_selection() { source ./android_choose_rom.sh 4 n n; }
+function android_selection() { source ./android_choose_rom.sh 3 n n; }
 android_selection;
 
 # Development Scripts
@@ -25,30 +25,12 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   fi;
   repo sync -j8 --current-branch --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags;
   source ./build/envsetup.sh;
-
-  croot;
-  cd ./build/; echo "";
-  git fetch https://github.com/AdrianDC/aosp_huashan_build.git android_build;core/dynamic_binary.mk
-  git cherry-pick ee0b6151e2989600131ed4ccc1eaf2682826b2a1; # [NEEDED] build: Disable relocation packing on recovery and utility executables
-
-  croot;
-  cd ./bionic; echo "";
-  # [NEEDED] bionic: linker: Load shim libs *before* the self-linked libs
-  git fetch http://AdrianDC@review.cyanogenmod.org/a/CyanogenMod/android_bionic refs/changes/02/132902/1 && git cherry-pick FETCH_HEAD;
-  # [NEEDED] Add prlimit to LP32.
-  git fetch http://AdrianDC@review.cyanogenmod.org/a/CyanogenMod/android_bionic refs/changes/96/135596/1 && git cherry-pick FETCH_HEAD;
-
-  croot;
-  cd ./system/core/; echo "";
-  # [NEEDED] Healthd and charger commits
-  git fetch https://github.com/AdrianDC/aosp_huashan_build.git android_system_core;
-  git cherry-pick a57098bb9ee2a3d1beb93bb52fa0873f53e0625a; # charger: Show all charger animations
-  git cherry-pick 75bf203c6b35e965ff9ee7a0bc85b3b5fb08bf80; # healthd: allow custom charger
-  git cherry-pick 0951fb068e73ae448a1eeea12a0f1d334137b876; # Partially revert "healthd: allow custom charger"
-
-  croot;
-  sed -i "s/\(ALOGV(\"message received msg=%d, ext1=%d, ext2=%d, obj=\)%x\(\",\)/\1%p\2/g" "frameworks/base/cmds/bootanimation/BootAnimation.cpp";
 fi;
+
+
+
+
+
 
 # System Output Cleaning
 if [[ "$BuildMode" =~ "clean" ]]; then
@@ -83,9 +65,9 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
   if [[ "$BuildMode" =~ "kernel" ]]; then
-    source $ScriptsDir/android_make_kernel.sh "release,otapackage" "aosp-mm6.0.1-";
+    source $ScriptsDir/android_make_kernel.sh "release" "cm-13.0-";
   else
-    source $ScriptsDir/android_brunch.sh "automatic,$BuildMode,otapackage";
+    source $ScriptsDir/android_brunch.sh "automatic,$BuildMode";
   fi;
 
   # ROM Successful
@@ -97,7 +79,7 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   if [[ ! "$BuildMode" =~ "local" ]]; then
     cd $ScriptsDir/;
     if [[ ! "$BuildMode" =~ "test" ]]; then
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/AOSP-CAF-6.0";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "${PhoneName^}/CyanogenMod-13.0";
     else
       source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development";
     fi;

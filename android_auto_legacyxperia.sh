@@ -43,10 +43,21 @@ if [[ "$BuildMode" =~ "clean" ]]; then
   echo "";
   cd $AndroidDir/;
   make clean;
-elif [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
+elif [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ ! -z "$OutDir" ]; then
   echo "";
   echo " [ System - Wiping /system output ]";
+  rm -rf "$OutDir/combinedroot";
+  rm -rf "$OutDir/data";
+  rm -rf "$OutDir/recovery";
+  rm -rf "$OutDir/root";
   rm -rf "$OutDir/system";
+  rm -rf "$OutDir/utilities";
+  rm -rf "$OutDir/boot"*;
+  rm -rf "$OutDir/combined"*;
+  rm -rf "$OutDir/kernel";
+  rm -rf "$OutDir/ramdisk"*;
+  rm -rf "$OutDir/recovery"*;
+  rm -rf "$OutDir/system"*;
   echo "";
   echo "Output folder '/system' deleted";
   echo "";

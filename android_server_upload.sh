@@ -24,7 +24,7 @@ else
 fi;
 
 echo "";
-echo " [ Uploading to the server - User '$UploadUserName' - Path '$UploadFolder' ]";
+echo -e " \e[1;33m[ Uploading to the server - User '$UploadUserName' - Path '$UploadFolder' ]\e[0m";
 echo "";
 if [ ! -z "$SendFile" ] && [ -f "$SendFile" ] && [ ! -z "$UploadPassword" ]; then
 
@@ -36,6 +36,9 @@ if [ ! -z "$SendFile" ] && [ -f "$SendFile" ] && [ ! -z "$UploadPassword" ]; the
   if [[ "$SendFileExt" =~ 'zip' ]]; then
     SendFileType='application/zip';
   fi;
+
+  echo "   File '$(basename $SendFile)' uploading...";
+  echo "";
 
   curl -L -# --dump-header .headers \
           -F "ftp_user=$UploadUserName" \
@@ -58,6 +61,9 @@ if [ ! -z "$SendFile" ] && [ -f "$SendFile" ] && [ ! -z "$UploadPassword" ]; the
           -o .uploadoutputs \
           "https://$UploadServer/?ftpAction=upload&filePath=";
 
+  echo "";
+  echo -e "  \e[1;32mUploaded to :\e[0m https://basketbuild.com/filedl/devs?dev=${UploadUserName:0:-2}&dl=${UploadUserName:0:-2}/$UploadFolder/$SendFileName ";
+
   if [ -f "./.headers" ]; then
     rm "./.headers";
   fi;
@@ -74,6 +80,5 @@ fi;
 
 TimeDiff=$(($(date +%s)-$TimeStart));
 echo "";
-echo "";
-echo " [ Done in $TimeDiff secs ]";
+echo -e " \e[1;37m[ Done in $TimeDiff secs ]\e[0m";
 echo "";

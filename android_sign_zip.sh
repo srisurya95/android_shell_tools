@@ -7,7 +7,12 @@ echo " [ Drag & Drop the zip file ]";
 echo "";
 
 printf " > ";
-read -e ZipFile;
+if [ ! -z "$1" ] && [ -f "$1" ]; then
+  ZipFile="$1";
+  echo "$ZipFile";
+else
+  read -e ZipFile;
+fi;
 ZipFile=${ZipFile//[\' ]/};
 BackupFile="$ZipFile.original.zip";
 NewSigFile="$ZipFile.signed.zip";
@@ -30,6 +35,7 @@ if [ -f "$NewSigFile" ]; then
 
   mv "$ZipFile" "$BackupFile";
   mv "$NewSigFile" "$ZipFile";
+  rm "$BackupFile";
 
   echo "";
   echo "  $(basename $ZipFile) created.";
@@ -41,4 +47,6 @@ TimeDiff=$(($(date +%s)-$TimeStart));
 echo "";
 echo " [ Done in $TimeDiff secs ]";
 echo "";
-read key;
+if [ -z "$2" ]; then
+  read key;
+fi;

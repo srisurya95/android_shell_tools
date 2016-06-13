@@ -73,8 +73,10 @@ do
   echo " [ Making the requested libraries ]";
   echo "";
   echo "";
-  cd $OutDir/;
-  rm -fv ${MakeClean[*]};
+  if [ -d "$OutDir" ]; then
+    cd $OutDir/;
+    rm -fv ${MakeClean[*]};
+  fi;
   cd $AndroidDir/;
   TmpLogFile=$(mktemp);
   mmm -B -j8 ./external/sepolicy/ | tee $TmpLogFile;

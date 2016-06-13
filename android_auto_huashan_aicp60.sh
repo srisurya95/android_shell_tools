@@ -23,7 +23,7 @@ if [[ ! "$BuildMode" =~ "test" && ! "$BuildMode" =~ "nosync" ]]; then
   echo " [ Syncing $PhoneName repositories ]";
   echo "";
   cd $AndroidDir/;
-  if [[ ! "$BuildMode" =~ "unsafe" ]]; then
+  if [[ "$BuildMode" =~ "clean" ]] || [[ "$BuildMode" =~ "safe" ]]; then
     repo forall -c 'echo "Cleaning project ${REPO_PROJECT}"; \
                     git rebase --abort >/dev/null 2>&1; \
                     git stash -u >/dev/null 2>&1; \
@@ -39,10 +39,21 @@ if [[ "$BuildMode" =~ "clean" ]]; then
   echo "";
   cd $AndroidDir/;
   make clean;
-elif [[ ! "$BuildMode" =~ "nowipe" ]] && [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ -d "$OutDir/system" ]; then
+elif [[ ! "$BuildMode" =~ "nowipe" ]] && [[ ! "$BuildMode" =~ "test" || "$BuildMode" =~ "wipe" ]] && [ ! -z "$OutDir" ]; then
   echo "";
   echo " [ System - Wiping /system output ]";
+  rm -rf "$OutDir/combinedroot";
+  rm -rf "$OutDir/data";
+  rm -rf "$OutDir/recovery";
+  rm -rf "$OutDir/root";
   rm -rf "$OutDir/system";
+  rm -rf "$OutDir/utilities";
+  rm -rf "$OutDir/boot"*;
+  rm -rf "$OutDir/combined"*;
+  rm -rf "$OutDir/kernel";
+  rm -rf "$OutDir/ramdisk"*;
+  rm -rf "$OutDir/recovery"*;
+  rm -rf "$OutDir/system"*;
   echo "";
   echo "Output folder '/system' deleted";
   echo "";

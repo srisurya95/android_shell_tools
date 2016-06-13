@@ -5,8 +5,8 @@ source $ScriptDir/android_set_variables.rc;
 echo "";
 echo " User : $GitUserName - EMail : $GitEMail";
 
-git config --global user.name $GitUserName;
-git config --global user.email $GitEMail;
+git config --global user.name "$GitUserName";
+git config --global user.email "$GitEMail";
 git config --global credential.helper store;
 git config --global review.review.cyanogenmod.org.username $GitUserName;
 git config --global mergetool.keepBackup false;
