@@ -5,7 +5,7 @@ export AndroidROMs=("CyanogenMod" \
                     "AICP-6.0" \
                     "CM-13.0" \
                     "AOSP-CAF-6.0" \
-                    "AOSP-RRO-6.0" \
+                    "AOSP-OMS-6.0" \
                     "Nightly" \
                     "LegacyXperia-13.0" \
                     "LegacyXperia-12.1" \
@@ -15,7 +15,7 @@ export AndroidSyncs=("CyanogenMod" \
                      "AICP" \
                      "CyanogenMod" \
                      "AOSP-CAF" \
-                     "AOSP-RRO" \
+                     "AOSP-OMS" \
                      "Nightly" \
                      "LegacyXperia-13.0" \
                      "LegacyXperia-12.1" \

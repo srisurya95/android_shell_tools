@@ -40,7 +40,7 @@ do
     make installclean;
   fi;
   TmpLogFile=$(mktemp);
-  if [[ "$1" =~ "aosprro" ]]; then
+  if [[ "$1" =~ "aospoms" ]]; then
     lunch aosp_$PhoneName-userdebug;
     make -j$(grep -c ^processor /proc/cpuinfo) bacon | tee $TmpLogFile;
   elif [[ "$1" =~ "otapackage" ]]; then

@@ -65,9 +65,9 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   cd $ScriptsDir/;
   android_selection;
   if [[ "$BuildMode" =~ "kernel" ]]; then
-    source $ScriptsDir/android_make_kernel.sh "release,otapackage" "AOSP-RRO-6.0.1-";
+    source $ScriptsDir/android_make_kernel.sh "release,otapackage" "AOSP-OMS-6.0.1-";
   else
-    source $ScriptsDir/android_brunch.sh "automatic,$BuildMode,aosprro";
+    source $ScriptsDir/android_brunch.sh "automatic,$BuildMode,aospoms";
   fi;
 
   # ROM Successful
@@ -79,7 +79,7 @@ if [[ ! "$BuildMode" =~ "synconly" ]]; then
   if [[ ! "$BuildMode" =~ "local" ]]; then
     cd $ScriptsDir/;
     if [[ ! "$BuildMode" =~ "test" ]]; then
-      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/AOSP-RRO-6.0";
+      source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Huashan/AOSP-OMS-6.0";
     else
       source $ScriptsDir/android_server_upload.sh "$AndroidResult" "Development";
     fi;
