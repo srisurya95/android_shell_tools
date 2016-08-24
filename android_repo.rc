@@ -3,6 +3,81 @@
 #   Developed by Adrian DC - 2015-2016
 # ======================================
 
+# === Repo Environment Starter for CM ===
+function repos()
+{
+  local currentdir=${PWD}; repor;
+  if [ -f ./build/envsetup.sh ]; then
+    local device=$(getine "$1" "huashan");
+    source ./build/envsetup.sh; croot;
+    breakfast $device;
+  else
+    echo "Android Repo not found...";
+  fi;
+  cd "$currentdir";
+}
+
+# === Repo Environment Starter for AOSP ===
+function reposaosp()
+{
+  local currentdir=${PWD}; repor;
+  if [ -f ./build/envsetup.sh ]; then
+    local device=$(getine "$1" "huashan");
+    source ./build/envsetup.sh; croot;
+    lunch aosp_${device}-userdebug;
+  else
+    echo "Android Repo not found...";
+  fi;
+  cd "$currentdir";
+}
+
+# === Repo Sync Project ===
+alias reposi='repo sync .';
+
+# === Repo Sync Efficiently ===
+alias reposy='repo sync -j$(grep -c ^processor /proc/cpuinfo) --current-branch --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags';
+
+# === Repo Sync Clean ===
+function reposycl()
+{
+  repo forall -c 'echo "Cleaning project ${REPO_PROJECT}"; \
+                  git rebase --abort >/dev/null 2>&1; \
+                  git stash -u >/dev/null 2>&1; \
+                  git reset --hard HEAD >/dev/null 2>&1;';
+  repo sync -j$(grep -c ^processor /proc/cpuinfo) --current-branch --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags;
+}
+
+# === Repo Study Projects ===
+function reposup()
+{
+  echo '';
+  repo forall -c 'git fetch --quiet ${REPO_REMOTE} ${REPO_RREV##*/}; \
+                  changescount=$(git rev-list --left-only --count HEAD...FETCH_HEAD); \
+                  if [ ${changescount} -ne 0 ]; then \
+                    echo " Project ${REPO_PROJECT} : ${changescount} changes"; \
+                  fi; \
+                  if [ $(git diff --quiet; echo $?) -ne 0 ]; then \
+                    echo ''; \
+                    echo " Project ${REPO_PROJECT} : Differences"; \
+                    git diff; \
+                    echo ''; \
+                  fi;' 2> /dev/null;
+  echo '';
+}
+
+# === Repo CCache Status/Setter ===
+function repocache()
+{
+  local currentdir=$(pwd);
+  repor;
+  if [ ! -z "$1" ]; then ./prebuilts/misc/linux-x86/ccache/ccache -M $1; fi;
+  watch -n 1 -d "./prebuilts/misc/linux-x86/ccache/ccache" -s;
+  cd $currentdir;
+}
+
+# === Repo CCache Cleaner ===
+alias repocleancache='if [ ! -z "$CCACHE_DIR" ]; then rm -rfv "$CCACHE_DIR/"*; fi';
+
 # === Build paths ===
 export bash_android_flashable_zip=$bash_android_dir/android_files/flashable_template.zip;
 export bash_kernel_template_zip=$bash_android_dir/android_files/kernel_template.zip;

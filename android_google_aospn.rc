@@ -1,0 +1,196 @@
+#!/bin/bash
+# ======================================
+#   Developed by Adrian DC - 2015-2016
+# ======================================
+
+# === AOSP N Patcher ===
+function aospnpatcher()
+{
+  # Repo root
+  if [ -z "$(type -t croot)" ]; then
+    while [ ! -e './build/envsetup.sh' ]; do
+      cd ../;
+    done;
+    source ./build/envsetup.sh;
+  fi;
+  croot;
+
+  # ==========================================================
+  # bionic
+  croot;
+  cd bionic/;
+  git fetch http://github.com/CyanogenMod/android_bionic staging/cm-14.0;
+  git reset --hard FETCH_HEAD; git stash -u;
+
+  # ==========================================================
+  # build
+  croot;
+  cd build/;
+  git fetch http://github.com/AdrianDC/android_development_backup n_build;
+  git reset --hard FETCH_HEAD; git stash -u;
+
+  # ==========================================================
+  # device/sony/common
+  croot;
+  cd device/sony/common/;
+  git reset --hard HEAD; git stash -u;
+  git fetch http://review.cyanogenmod.org/a/CyanogenMod/android_device_sony_common \
+    refs/changes/45/158145/1 && git checkout FETCH_HEAD;
+
+  # ==========================================================
+  # device/qcom/sepolicy
+  croot;
+  cd device/qcom/sepolicy/;
+  git reset --hard HEAD; git stash -u;
+  #sed -i '/sdcard_internal/d' ./common/diag.te;
+  #sed -i '/type sysfs_thermal/d' ./common/file.te;
+  #sed -i '/allow nfc nfc_data_file:file x_file_perms/d' ./common/nfc.te;
+  #sed -i '/allow radio radio_data_file:file x_file_perms/d' ./common/radio.te;
+  #sed -i '/allow RIDL debugfs:file/d' ./common/ridl.te;
+  #git add ./common/*.te;
+  #git commit -m 'Bringup: Remove old sepolicies' --no-edit;
+  git fetch http://AdrianDC@review.cyanogenmod.org/a/CyanogenMod/android_device_qcom_sepolicy \
+    refs/changes/79/158279/1 && git checkout FETCH_HEAD;
+  git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # external/libselinux
+  croot;
+  cd external/libselinux/;
+  git fetch http://review.cyanogenmod.org/a/CyanogenMod/android_external_libselinux \
+    refs/changes/28/158228/1 && git cherry-pick FETCH_HEAD;
+  git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # external/stlport
+  croot;
+  cd external/stlport/;
+  git reset --hard HEAD; git stash -u;
+  git fetch http://review.cyanogenmod.org/a/CyanogenMod/android_external_stlport \
+    refs/changes/15/158215/1 && git checkout FETCH_HEAD;
+
+  # ==========================================================
+  # external/toybox
+  croot;
+  cd external/toybox/;
+  git reset --hard HEAD; git stash -u;
+  git fetch http://review.cyanogenmod.org/a/CyanogenMod/android_external_toybox \
+    refs/changes/18/158218/1 && git checkout FETCH_HEAD;
+
+  # ==========================================================
+  # frameworks/av
+  croot;
+  cd frameworks/av/;
+  git fetch https://github.com/CyanogenMod/android_frameworks_av cm-13.0;
+
+    # camera: allow device to append camera parameters
+    git cherry-pick 70e359f102a3c40cad45ff9ce5a2b3bcdb429658;
+
+    # audio policy: move output handle to AudioOutputDescriptor base class
+    #git fetch https://source.codeaurora.org/quic/la/platform/frameworks/av LA.BF.1.1.3_rb1.13;
+    #git cherry-pick ceaf083e01baf6c7549d58f3abe1f45dd5a12148;
+
+    # Clean project
+    git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # frameworks/opt/telephony
+  croot;
+  cd frameworks/opt/telephony/;
+  git fetch http://github.com/AdrianDC/android_development_backup n_telephony;
+  git reset --hard FETCH_HEAD; git stash -u;
+
+  # ==========================================================
+  # hardware/qcom/audio
+  croot;
+  cd hardware/qcom/audio/;
+  git fetch http://github.com/RonGokhale/android_hardware_qcom_audio.git \
+    marshmallow && git checkout FETCH_HEAD;
+  #git fetch http://github.com/CyanogenMod/android_hardware_qcom_audio.git \
+  #  cm-13.0-caf-8960 && git checkout FETCH_HEAD;
+  #sed -i 's/ifeq (\$(call my-dir),\$(call project-path-for,qcom-audio))/ifeq (true,true)/' Android.mk;
+  #git add Android.mk;
+  #git commit --m 'Bringup: Allow build' --no-edit;
+  git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # hardware/qcom/display
+  croot;
+  cd hardware/qcom/display/;
+  git reset --hard HEAD; git stash -u;
+  git fetch https://github.com/Rashed97/android_hardware_qcom_display cm-14.0;
+
+    # display: add TARGET_PROVIDES_LIBLIGHT
+    git cherry-pick c51d1a2f69cf68f78c324e13b2bee0f98218388a;
+
+    # Clean project
+    git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # hardware/ril: allow board to provide libril
+  croot;
+  cd hardware/ril/;
+  git fetch https://github.com/CyanogenMod/android_hardware_ril.git staging/cm-14.0;
+  git reset --hard FETCH_HEAD; git stash -u;
+  git revert 6cd19cc0063040e02e75254a119f5f9561d5ac7f --no-edit;
+
+  # ==========================================================
+  # hardware/sony/DASH
+  croot;
+  cd hardware/sony/DASH/;
+  git reset --hard HEAD; git stash -u;
+  git fetch http://review.cyanogenmod.org/a/CyanogenMod/android_hardware_sony_DASH \
+    refs/changes/12/158212/1 && git checkout FETCH_HEAD;
+
+  # ==========================================================
+  # packages/apps/Music
+  croot;
+  cd packages/apps/Music/;
+  git reset --hard HEAD; git stash -u;
+  git fetch aosp master;
+  git cherry-pick 6036ce6127022880a3d9c99bd15db4c968f3e6a3;
+  git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # packages/apps/Nfc
+  croot;
+  cd packages/apps/Nfc/;
+  git reset --hard HEAD; git stash -u;
+  git fetch http://github.com/CyanogenMod/android_packages_apps_Nfc cm-13.0;
+  git cherry-pick 34a9f864bcd60b0773c016327fa45cb711d1cc45;
+  git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # system/core
+  croot;
+  cd system/core/;
+  git fetch http://github.com/AdrianDC/android_development_backup n_systemcore;
+  git reset --hard FETCH_HEAD; git stash -u;
+  TOADD: healthd backlight support!
+
+  # ==========================================================
+  # system/sepolicy
+  croot;
+  cd system/sepolicy/;
+  git reset --hard HEAD; git stash -u;
+  git fetch http://AdrianDC@review.cyanogenmod.org/a/CyanogenMod/android_system_sepolicy \
+    refs/changes/87/158287/1 && git checkout FETCH_HEAD;
+  #sed -i '/neverallow { domain -init -system_server -dumpstate } debugfs:f/d' ./domain.te;
+  #sed -i '518,539d' ./domain.te;
+  #sed -i '/neverallow netd { domain -system_server -servicemanager userdebug_o/d' ./netd.te;
+  #git add ./domain.te;
+  #git add ./netd.te;
+  #git commit -m 'Bringup: Remove some sepolicies' --no-edit;
+  git reset --hard HEAD; git stash -u;
+
+  # ==========================================================
+  # system/vold
+  #croot;
+  #cd system/vold/;
+  #git fetch http://github.com/CyanogenMod/android_system_vold staging/cm-14.0;
+  #git reset --hard FETCH_HEAD; git stash -u;
+
+  # ==========================================================
+  # repo root
+  croot;
+}

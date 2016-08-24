@@ -26,20 +26,25 @@ function fboota()
   echo "";
 
   if [[ "$1" =~ "unsecure" ]]; then
-    fileslist="./out/target/product/$device/root/default.prop \
+    fileslist="./build/core/main.mk \
+               ./out/target/product/$device/root/default.prop \
                ./out/target/product/$device/recovery/root/default.prop \
                ./out/target/product/$device/ota_temp/\*/RAMDISK/default.prop \
                ./out/target/product/$device/obj/PACKAGING/target_files_intermediates/\*/\*/RAMDISK/default.prop";
     for file in $fileslist; do
       echo "Unsecuring $file";
-      sudo sed -i 's/ro.adb.secure=1/ro.adb.secure=0/' $file;
-      sudo sed -i 's/ro.secure=1/ro.secure=0/' $file;
-      sudo sed -i 's/persist.sys.usb.config=none/persist.sys.usb.config=mtp,adb/' $file;
+      sed -i 's/ro.adb.secure=1/ro.adb.secure=0/' $file;
+      sed -i 's/ro.secure=1/ro.secure=0/' $file;
+      sed -i 's/persist.sys.usb.config=none/persist.sys.usb.config=mtp,adb/' $file;
     done;
   fi;
 
   if [[ "$1" =~ "sep" ]]; then
-    mmm -B -j$(grep -c ^processor /proc/cpuinfo) ./external/sepolicy/;
+    if [ -d ./system/sepolicy ]; then
+      mmm -j$(grep -c ^processor /proc/cpuinfo) ./system/sepolicy/;
+    else
+      mmm -B -j$(grep -c ^processor /proc/cpuinfo) ./external/sepolicy/;
+    fi;
   fi;
 
   if [[ ! "$1" =~ "full" ]] && $(mms -v >/dev/null 2>&1); then
@@ -105,6 +110,24 @@ function fboot()
   else
     sudo fastboot flash boot boot.img;
   fi;
+  sudo fastboot reboot;
+}
+
+# === System Flasher ===
+function fboots()
+{
+  sudo adb reboot bootloader;
+  if [ ! -z "$1" ]; then
+    file=$(echo "$1" | sed 's/file:\/\/\(.*\)/\1/');
+    sudo fastboot flash system "$file";
+  else
+    sudo fastboot flash system system.img;
+  fi;
+}
+
+# === Fastboot Reboot ===
+function fbootr()
+{
   sudo fastboot reboot;
 }
 

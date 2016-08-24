@@ -1,0 +1,162 @@
+#!/bin/bash
+# ======================================
+#   Developed by Adrian DC - 2015-2016
+# ======================================
+
+# === CM 14 Patcher ===
+function cm14patcher()
+{
+  # ==========================================================
+  # Repo root
+  if [ -z "$(type -t croot)" ]; then
+    while [ ! -e './build/envsetup.sh' ]; do
+      cd ../;
+    done;
+    source ./build/envsetup.sh;
+  fi;
+  croot;
+  export I_WANT_A_QUAIL_STAR=true;
+
+  # ==========================================================
+  # CAF Alternate trees - Detect additional caf.xml
+  trees_caf=false;
+  if [ -f .repo/local_manifests/caf.xml ]; then
+    trees_caf=true;
+  fi;
+
+  # ==========================================================
+  # linker: Make text relocations denial optional
+  repopick 158551 -P bionic;
+
+  # ==========================================================
+  # sepolicy: msm8960: Remove DR_AP_Service from file_contexts
+  repopick 159607;
+
+  # ==========================================================
+  # eleven: cm-14.0 time
+  repopick 158414 -P packages/apps/Eleven;
+
+  # ==========================================================
+  # hax: sepolicy: hack around neverallows
+  repopick 158277;
+
+  # hax: Disable system-api generation
+  repopick 159198;
+
+  # hax: cm: Disable non-working projects
+  repopick 159327;
+
+  # HAX: Remove non-working projects for now
+  repopick 159492;
+
+  # hax: sepolicy: Workarounds for neverallow issues
+  repopick 158287;
+
+  # ==========================================================
+  # DONOTMERGE: sepolicy: Allow system text relocations
+  repopick 158716;
+
+  # ==========================================================
+  # adbd and BoringSSL
+  repopick 160005-160014;
+
+  # ==========================================================
+  # libbt: Disable FM_OVER_UART
+  repopick 159934;
+
+  # ==========================================================
+  # libbt-vendor: Add kernel header dependency
+  repopick 160030;
+
+  # ==========================================================
+  # Revert "Fix hardware_legacy include path"
+  repopick 160015;
+
+  # ==========================================================
+  # Add back a helper pref that holds a system setting.
+  repopick 159948;
+
+  # Settings: Privacy Guard
+  repopick 159949;
+
+  # Settings: Battery and Notification Lights
+  repopick 159950;
+
+  # cm: Build CMParts
+  repopick 160025;
+
+  # cmparts
+  echo '';
+  cd packages/apps/CMParts/;
+  git reset --hard HEAD; git stash -u;
+  git fetch http://review.cyanogenmod.org/a/CyanogenMod/android_packages_apps_CMParts \
+    refs/changes/28/160028/1 && git checkout FETCH_HEAD;
+  croot;
+
+  # ==========================================================
+  # hardware/libhw: Add display_defs.h to declare custom enums/flags
+  if ! $trees_caf; then
+    repopick 158286;
+  fi;
+
+  # ==========================================================
+  # CamcorderProfiles: Add new camcorder profiles
+  if ! $trees_caf; then
+    repopick 159464;
+  fi;
+
+  # ==========================================================
+  # Revert "Get the definitions of UART IOCTL values from common header file"
+  if $trees_caf; then
+    echo '';
+    cd hardware/qcom/bt-caf/;
+    git reset --hard HEAD; git stash -u;
+    git revert fb6f6971efff1bb02aeaa0c7c0f05f7b1f234e7e --no-edit;
+  # hardware/qcom/bt-caf (aosp instead of caf) # NO-CAF
+  else
+    echo '';
+    cd hardware/qcom/bt-caf/;
+    git reset --hard HEAD; git stash -u;
+    git fetch http://github.com/CyanogenMod/android_hardware_qcom_bt \
+      staging/cm-14.0 && git reset --hard FETCH_HEAD; git stash -u;
+  fi;
+  croot;
+
+  # ==========================================================
+  # hardware/libhardware_legacy (caf updates) # NO-CAF
+  echo '';
+  cd hardware/libhardware_legacy/;
+  if ! $trees_caf; then
+    git fetch http://github.com/CyanogenMod/android_hardware_libhardware_legacy \
+      staging/cm-14.0-caf && git reset --hard FETCH_HEAD; git stash -u;
+  fi;
+  croot;
+
+  # ==========================================================
+  # hardware/qcom/wlan-caf # NO-CAF
+  echo '';
+  cd hardware/qcom/wlan-caf/;
+  git reset --hard HEAD; git stash -u;
+  if ! $trees_caf; then
+    git fetch http://github.com/luca020400/android_hardware_qcom_wlan \
+      staging/cm-14.0 && git reset --hard FETCH_HEAD; git stash -u;
+  fi;
+  croot;
+
+  # ==========================================================
+  # vendor/qcom/opensource/bluetooth (broken vendor bt) # NO-CAF
+  echo '';
+  cd vendor/qcom/opensource/bluetooth/;
+  if ! $trees_caf; then
+    sed -i 's/#ifeq (0,1)/ifeq (0,1)/' Android.mk;
+    sed -i 's/#endif/endif/' Android.mk;
+    git add Android.mk;
+    git commit -m 'qcom: bluetooth: Disable inclusion' --no-edit;
+  fi;
+  croot;
+
+  # ==========================================================
+  # repo root
+  echo '';
+  croot;
+}

@@ -12,8 +12,14 @@ function adbpf()
       if [ -d "${filepath}" ]; then
         adbpf "${filepath}/"*;
       else
-        if [[ "${filepath}" =~ "proprietary" ]]; then
+        if [[ "${filepath}" =~ 'proprietary' ]]; then
           file=$(printf "${filepath}" | sed "s/.*proprietary\(.*\)/\/system\1/g");
+        elif [[ "${filepath}" =~ 'system' ]]; then
+          file=$(printf "${filepath}" | sed "s/.*\(system.*\)/\/\1/g");
+        elif [[ "${filepath}" =~ '.xml' ]] || [[ "${filepath}" =~ '.conf' ]]; then
+          file="/system/etc/"$(basename $filepath);
+        elif [[ "${filepath}" =~ '.so' ]]; then
+          file="/system/lib/"$(basename $filepath);
         else
           file=$(printf "${filepath}" | sed "s/.*\(system.*\)/\/\1/g");
         fi;

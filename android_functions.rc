@@ -20,40 +20,19 @@ function repor()
     cd ${repodir};
   fi;
 }
-function repos()
+function reposypb()
 {
-  local currentdir=${PWD}; repor;
-  if [ -f ./build/envsetup.sh ]; then
-    local device=$(getine "$1" "huashan");
-    source ./build/envsetup.sh; croot;
-    breakfast $device;
-  else
-    echo "Android Repo not found...";
-  fi;
-  cd "$currentdir";
-}
-function reposaosp()
-{
-  local currentdir=${PWD}; repor;
-  if [ -f ./build/envsetup.sh ]; then
-    local device=$(getine "$1" "huashan");
-    source ./build/envsetup.sh; croot;
-    lunch aosp_${device}-userdebug;
-  else
-    echo "Android Repo not found...";
-  fi;
-  cd "$currentdir";
-}
-alias repolx='nano .repo/local_manifests/updates.sh; .repo/local_manifests/updates.sh';
-alias reposi='repo sync .';
-alias reposy='repo sync -j$(grep -c ^processor /proc/cpuinfo) --current-branch --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags';
-function reposycl()
-{
-  repo forall -c 'echo "Cleaning project ${REPO_PROJECT}"; \
-                  git rebase --abort >/dev/null 2>&1; \
-                  git stash -u >/dev/null 2>&1; \
-                  git reset --hard HEAD >/dev/null 2>&1;';
-  repo sync -j$(grep -c ^processor /proc/cpuinfo) --current-branch --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags;
+  repo forall -c 'echo "Syncing project ${REPO_PROJECT}"; \
+                  while true; do \
+                    timeout 15 repo sync -j1 --current-branch --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags .; \
+                    if [ $? -eq 0 ]; then \
+                      echo "";
+                      echo " Project ${REPO_PROJECT} : Fallback to old branch"; \
+                      git fetch --quiet ${REPO_REMOTE} cm-13.0; \
+                      git reset --hard FETCH_HEAD; \
+                      break;
+                    fi; \
+                  done;';
 }
 function reposyp()
 {
@@ -63,24 +42,9 @@ function reposyp()
                     if [ $? -eq 0 ]; then break; fi; \
                   done;';
 }
+alias repolx='nano .repo/local_manifests/updates.sh; .repo/local_manifests/updates.sh';
 alias repop='repopick';
-function reposup()
-{
-  repo forall -c 'git fetch --quiet ${REPO_REMOTE} ${REPO_RREV##*/}; \
-                  changescount=$(git rev-list --left-only --count HEAD...FETCH_HEAD); \
-                  if [ ${changescount} -ne 0 ]; then \
-                    echo " Project ${REPO_PROJECT} : ${changescount} changes"; \
-                  fi;';
-}
-function repocache()
-{
-  local currentdir=$(pwd);
-  repor;
-  if [ ! -z "$1" ]; then ./prebuilts/misc/linux-x86/ccache/ccache -M $1; fi;
-  watch -n 1 -d "./prebuilts/misc/linux-x86/ccache/ccache" -s;
-  cd $currentdir;
-}
-alias repocleancache='if [ ! -z "$CCACHE_DIR" ]; then rm -rfv "$CCACHE_DIR/"*; fi';
+
 function reposyl()
 {
   local currentdir=${PWD}; repor;
@@ -157,7 +121,7 @@ function adbrh() { adb $1 shell setprop ctl.restart zygote; }
 alias adbrr='adb reboot recovery';
 alias adbw='adb wait-for-device';
 alias adbrb='adb reboot bootloader';
-alias adbscr='adb shell screencap /sdcard/screenshot.png; adb pull /sdcard/screenshot.png';
+alias adbscr='mkdir -p ./screenshots; adb shell screencap /sdcard/screenshot.png; adb pull /sdcard/screenshot.png ./screenshots/screenshot-$(date +%Y%m%d-%H%M%S).png';
 alias adbfotar='adb root; adb shell dd if=/dev/random of=/dev/block/platform/msm_sdcc.1/by-name/FOTAKernel';
 alias adbfotaz='adb root; adb shell dd if=/dev/zero of=/dev/block/platform/msm_sdcc.1/by-name/FOTAKernel';
 alias adbsgdisk='adb shell sgdisk --print /dev/block/mmcblk0';
@@ -267,7 +231,9 @@ function adbedit()
 function adbupdate()
 {
   adb version;
+  sudo rm -f adb;
   wget -O - https://skia.googlesource.com/skia/+archive/cd048d18e0b81338c1a04b9749a00444597df394/platform_tools/android/bin/linux.tar.gz | tar -zxvf - adb;
+  sudo rm -f /usr/bin/adb;
   sudo mv adb /usr/bin/adb;
   sudo chmod +x /usr/bin/adb;
   adb version;
@@ -301,7 +267,11 @@ function makesep()
 {
   cwd=$(pwd);
   repor;
-  mmm -B -j$(grep -c ^processor /proc/cpuinfo) ./external/sepolicy/ | tee $LogFile;
+  if [ -d ./system/sepolicy ]; then
+    mmm -B -j$(grep -c ^processor /proc/cpuinfo) ./system/sepolicy/ | tee $LogFile;
+  else
+    mmm -B -j$(grep -c ^processor /proc/cpuinfo) ./external/sepolicy/ | tee $LogFile;
+  fi;
   cd $cwd;
 }
 function makedefconf()
@@ -449,6 +419,7 @@ function cdd()         { device="$1"; if [ -z "$device" ]; then device="huashan"
                          else
                            cd *"$1"*;
                          fi; }
+function cdman()       { cd $(echo "$(pwd)" | sed "s/\(.*\)Android\([^/]*\/[^/]*\).*/\1Android\2\/.repo\/manifests/g"); }
 function cdspker()     { cd $(echo "$(pwd)" | sed 's/\(.*\)Android\([^/]*\/[^/]*\).*/\1Android\2\/kernel\/sony\/msm8960t/g'); }
 function cdblueker()   { cd $(echo "$(pwd)" | sed 's/\(.*\)Android\([^/]*\/[^/]*\).*/\1Android\2\/kernel\/sony\/msm8x60/g'); }
 function cdspven()     { cd $(echo "$(pwd)" | sed 's/\(.*\)Android\([^/]*\/[^/]*\).*/\1Android\2\/vendor\/sony/g'); }
@@ -456,36 +427,35 @@ function cdspout()     { cd $(echo "$(pwd)" | sed 's/\(.*\)Android\([^/]*\/[^/]*
 function cdout()       { device="$1"; if [ -z "$device" ]; then device="huashan"; fi;
                          cd $(echo "$(pwd)" | sed "s/\(.*\)Android\([^/]*\/[^/]*\).*/\1Android\2\/out\/target\/product\/$device*/g"); }
 function cdmintout()   { cd $(echo "$(pwd)" | sed 's/\(.*\)Android\([^/]*\/[^/]*\).*/\1Android\2\/out\/target\/product\/mint/g'); }
+function toaosp()      { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/AOSP\2/g'; }
 function toaospcaf()   { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/AOSP-CAF-6.0\2/g'; }
 function toaospoms()   { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/AOSP-OMS-6.0\2/g'; }
-function tocm12()      { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/CyanogenMod\2/g'; }
-function tocm13()      { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/CM-13.0\2/g'; }
+function tocm()        { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/CyanogenMod\2/g'; }
 function totwrp()      { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/TWRP\2/g'; }
 function tomultirom()  { echo "$(pwd)/$1" | sed 's/\(.*\)Android[^/]*\/[^/]*\(.*\)/\1Android*\/MultiROM\2/g'; }
-function getand()      { echo $(echo "/media/adriandc/Android"* | head -n 1); }
+function getand()      { dirname $(echo "/media/adriandc/Android"*"/Bash"); }
 function getbash()     { echo $bash_android_dir; }
 function getscripts()  { echo $(getand)/Scripts; }
 function cdand()       { cd $(getand); }
+function cdaosp()      { cd $(toaosp $1); }
 function cdaospcaf()   { cd $(toaospcaf $1); }
 function cdaospoms()   { cd $(toaospoms $1); }
-function cdcm12()      { cd $(tocm12 $1); }
-function cdcm13()      { cd $(tocm13 $1); }
+function cdcm()        { cd $(tocm $1); }
 function cdgh()        { cd $(getand)/Paths/gerrit-huashan; }
 function cdbash()      { cd $(getbash); }
 function cdscripts()   { cd $(getscripts); }
 function cdserver()    { cd $(getand)/Server; }
 function cdmultirom()  { cd $(tomultirom $1); }
 function cdtwrp()      { cd $(totwrp $1); }
-function cda()         { cdand; cdcm13; }
+function cda()         { cdand; cdcm; }
 function cddesk()      { cd "$(xdg-user-dir DESKTOP)"; }
 function impaospcaf()  { rsync -arv --delete --delete-after $(toaospcaf $1) ./$1 ; }
 function impaospoms()  { rsync -arv --delete --delete-after $(toaospoms $1) ./$1 ; }
-function impcm12()     { rsync -arv --delete --delete-after $(tocm12 $1) ./$1 ; }
-function impcm13()     { rsync -arv --delete --delete-after $(tocm13 $1) ./$1 ; }
+function impcm()       { rsync -arv --delete --delete-after $(tocm $1) ./$1 ; }
+function meldaosp()    { meld ./$1 $(toaosp $1); }
 function meldaospcaf() { meld ./$1 $(toaospcaf $1); }
 function meldaospoms() { meld ./$1 $(toaospoms $1); }
-function meldcm12()    { meld ./$1 $(tocm12 $1); }
-function meldcm13()    { meld ./$1 $(tocm13 $1); }
+function meldcm()      { meld ./$1 $(tocm $1); }
 function reporoomserv()
 {
   cwd=$(pwd);
@@ -719,9 +689,16 @@ haste()
   rm $tmp;
 }
 
+# === Sepolicies Finder ===
+function sepaud()
+{
+  cat $1 | grep -a avc.*denied;
+  cat $1 | grep -a 'does not have a SELinux domain defined';
+  cat $1 | grep -a avc.*denied | audit2allow -p sepolicy;
+}
+
 # === Debug shortcuts ===
-function sepaud() { cat $1 | grep avc.*denied; cat $1 | grep avc.*denied | audit2allow -p sepolicy; }
-function adbl() { while [ 1 ]; do cls; printf "" >adb.log; adb $1 logcat -v threadtime *:V -C | tee -a adb.log;
+function adbl() { while [ 1 ]; do cls; printf "" >adb.log; adb $1 logcat -v threadtime *:V | tee -a adb.log;
                   echo ""; if [ -z "$2" ]; then printf "Press Enter to continue... "; read key; else sleep 10; fi; done; }
 alias adblb='while [ 1 ]; do cls; printf "" >adb.log; adb logcat -v audit2allow *:V | tee -a adb.log;
              echo ""; printf "Press Enter to continue... "; read key; done';
@@ -737,6 +714,9 @@ alias adbsel='adbkl; sepaud kmsg';
 alias adblf='adb logcat -v audit2allow';
 alias adblh='adb logcat -b events -b main -b radio | highlight';
 alias adbintents='adb shell dumpsys package r > intents.txt';
+alias adbcamera='adb shell pm enable com.android.camera2/com.android.camera.CameraLauncher; \
+                 adb shell pm enable com.google.android.GoogleCamera/com.android.camera.CameraLauncher; \
+                 adb shell "am start -a android.media.action.IMAGE_CAPTURE"';
 function adblcln() { cat $1 | cut -c 32- | tee $1.clean; }
 function adbkcln() { cat $1 | cut -c 15- | tee $1.clean; }
 alias adblkl='adb root; adb wait-for-device; adb shell killall zigote; adbl';
@@ -780,6 +760,7 @@ function adbsw() { adbro; adb shell "echo $1 > $2"; }
 alias isdone='notify-send "Process execution finished !"';
 function adbgitpf()
 {
+  adbro;
   tmpfile=$(mktemp);
   git diff-tree --no-commit-id --name-status -r $1 >"$tmpfile";
   while read line
@@ -792,6 +773,13 @@ function adbgitpf()
     adbpf "$file";
   done <$tmpfile;
   rm -f $tmpfile;
+}
+function adbpfa()
+{
+  adbro;
+  for file in $@; do
+    adbpf "$(readlink -f $file)";
+  done;
 }
 function adbdu()
 {
@@ -1045,7 +1033,7 @@ alias gitfs='git fetch origin; git reset origin/$(git rev-parse --abbrev-ref HEA
 alias gitfsu='git fetch origin; git reset origin/$(git rev-parse --abbrev-ref HEAD); git stash -p';
 alias gitfgr='gitfetchtreset github';
 alias gitfir='gitfetchtreset aicp mm6.0';
-alias gitfbr='gitfetchtreset blue';
+alias gitfblr='gitfetchtreset blue';
 alias gitfor='gitfetchtreset origin';
 alias gitfar='gitfetchtreset AdrianDC';
 alias gitfar13='gitfetchtreset AdrianDC cm-13.0';
@@ -1053,6 +1041,7 @@ alias gitfar6='gitfetchtreset AdrianDC aosp-6.0';
 alias gitfara6='gitfetchtreset AdrianDC android-6.0';
 alias gitfarm='gitfetchtreset AdrianDC multirom';
 alias gitfart='gitfetchtreset AdrianDC twrp';
+alias gitfbr='gitfetchtreset backup';
 alias gitfsr='gitfetchtreset source';
 alias gitfgc='gitfetchtcheckout github';
 alias gitfard='gitfetchtreset ADC';
@@ -1094,12 +1083,14 @@ function gitpu()
   echo "";
 }
 alias gitpa='gitpu $gitremotedefault';
+alias gitpa14='gitpu $gitremotedefault cm-14.0';
 alias gitpa6='gitpu $gitremotedefault aosp-6.0';
 alias gitpaa6='gitpu $gitremotedefault android-6.0';
 alias gitpam='gitpu $gitremotedefault multirom';
 alias gitpamm='gitpu $gitremotedefault marshmallow';
 alias gitpan='gitpu $gitremotedefault nougat';
 alias gitpat='gitpu $gitremotedefault twrp';
+alias gitpp='gitpu project master';
 function gitpacaf() { branch=$(getine $1 "LA.AF.1.2.1");
                       git push -f -u https://github.com/AdrianDC/android_kernel_sony_msm8x60.git HEAD:refs/heads/$branch; }
 alias gitpb='gitpu backup';
@@ -1169,14 +1160,28 @@ function gitbvv() { branch=$(getine $1 $(repogetbranch));
 alias gitrv='git remote -v';
 function gitremoteset()
 {
-  local project='CyanogenMod';
+  local repository='CyanogenMod';
   local remote='origin';
   if [ ! -z "$1" ]; then remote="$1"; fi;
-  if [ ! -z "$2" ]; then project="$2"; fi;
+  if [ ! -z "$2" ]; then repository="$2"; fi;
   local target=$(git remote -v \
+               | grep -i github \
                | head -n 1 \
-               | awk '{ print $2 }' \
-               | sed "s/\(http:\/\/\|https:\/\/\|git:\/\/\)\(.*\)\/[^\/]*\/\(.*\)/http:\/\/\2\/$project\/\3/");
+               | awk '{ print $2 }');
+  if [ -z "$target" ]; then
+    local project=$(git remote -v \
+                 | grep -v -i github \
+                 | head -n 1 \
+                 | awk '{ print $2 }' \
+                 | sed 's/.*\.com\///' \
+                 | sed 's/platform/android/' \
+                 | sed 's/\//_/g');
+    echo $project;
+    target='http://github.com/'$repository'/'$project;
+  fi;
+  echo $target;
+  target=$(echo $target \
+         | sed "s/\(http:\/\/\|https:\/\/\|git:\/\/\)\(.*\)\/[^\/]*\/\(.*\)/http:\/\/\2\/$repository\/\3/");
   if [ ! -z "$3" ]; then
     target=$(echo "$target" | sed "s/$3//");
   fi;
@@ -1186,9 +1191,10 @@ function gitremoteset()
 }
 function gitraa() { gitremoteset 'AdrianDC' 'AdrianDC' ''; }
 function gitrao() { gitremoteset 'origin' 'CyanogenMod' ''; }
+function gitraoo() { gitremoteset 'origin' "$1" ''; }
 function gitrat() { gitremoteset 'twrp' 'TeamWin' ''; }
 function gitrai() { gitremoteset 'aicp' 'AICP' 'android_'; }
-function gitrab() { git remote add backup https://github.com/AdrianDC/android_backup_huashan.git; }
+function gitrab() { git remote add backup https://github.com/AdrianDC/android_development_backup.git; }
 alias gitch='git checkout';
 alias gitbaclean='git fetch $gitremotedefault; git branch -r | grep $gitremotedefault | sed "s/$gitremotedefault\/\(.*\)/\1/g" | xargs -L 1 git push $gitremotedefault --delete';
 
@@ -1292,6 +1298,20 @@ function gitcpu()
   git cherry-pick $commit;
 }
 
+# === GitHub Url Cherry-Pick ===
+function gitcpup()
+{
+  if [ ! -z "$2" ] && [ ! -z "$3" ]; then
+    echo "$2";
+    curl $1.patch \
+        | sed "s/$2/$3/" \
+        | git apply -v --index;
+  else
+    curl $1.patch \
+        | git apply -v --index;
+  fi;
+}
+
 # === GitHub Url Fetch-Reset ===
 function gitfcu()
 {
@@ -1359,6 +1379,9 @@ function gitstat()
   git rev-list --left-right --count HEAD...FETCH_HEAD;
 }
 alias gitst='gitstat origin cm-13.0';
+alias gitst14='gitstat origin cm-14.0';
+alias gitsts14='gitstat origin staging/cm-14.0';
+alias gitsto='gitstat origin $(git rev-parse --abbrev-ref HEAD)';
 alias gitsta='gitstat AdrianDC cm-13.0';
 alias gitsta6='gitstat AdrianDC aosp-6.0';
 alias gitstaa6='gitstat AdrianDC android-6.0';

@@ -1,0 +1,65 @@
+#!/bin/bash
+# ======================================
+#   Developed by Adrian DC - 2015-2016
+# ======================================
+
+# === Bash AOSP Sources ===
+source $bash_android_dir/android_google_aospm.rc;
+source $bash_android_dir/android_google_aospn.rc;
+source $bash_android_dir/android_cyanogenmod_14.rc;
+
+# === AOSP Syncer ===
+function aospsync()
+{
+  # Android Selection
+  case $1 in
+    m)
+      # Android 6.0.1
+      repo init -u https://android.googlesource.com/platform/manifest -b android-6.0.1_r63;
+      repo sync -j$(grep -c ^processor /proc/cpuinfo) --current-branch \
+        --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags;;
+    n)
+      # Android 7.0.0
+      repo init -u https://android.googlesource.com/platform/manifest -b android-7.0.0_r1;
+      repo sync -j$(grep -c ^processor /proc/cpuinfo) --current-branch \
+        --detach -f --force-broken --force-sync -c --no-clone-bundle --no-tags;;
+    *)
+      # No selection
+      echo '';
+      echo ' Usage: aospsync [m/n]'
+      echo '';;
+  esac;
+}
+
+# === AOSP Builder ===
+function aospbuild()
+{
+  # ROM variables
+  local rom_device="$1";
+  local rom_params="$2";
+  if [[ "$1" == 'init' ]]; then
+    rom_device='huashan';
+    rom_params='nobuild';
+  fi;
+
+  # CPU handling
+  if [[ "$rom_params" =~ "j1" ]]; then
+    build_cpu_count=1;
+  else
+    build_cpu_count=$(grep -c ^processor /proc/cpuinfo);
+  fi;
+
+  # Compilation preparation
+  source ./build/envsetup.sh;
+  lunch aosp_huashan-eng;
+  #lunch aosp_huashan-userdebug;
+
+  # Compilation start
+  if [[ ! "$rom_params" =~ "nobuild" ]]; then
+    #make -j$build_cpu_count;
+    make -j$build_cpu_count otapackage;
+
+    # Final notification
+    pushbrom 'huashan';
+  fi;
+}

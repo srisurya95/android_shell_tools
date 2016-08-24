@@ -21,6 +21,7 @@ bash_android_sources="\
   $bash_android_dir/android_changelog.rc \
   $bash_android_dir/android_colors.rc \
   $bash_android_dir/android_gerritssh.rc \
+  $bash_android_dir/android_google.rc \
   $bash_android_dir/android_helpers.rc \
   $bash_android_dir/android_linux.rc \
   $bash_android_dir/android_release.rc \
@@ -40,7 +41,7 @@ function bashhelp()
 {
   for bash_source in $bash_android_sources;
   do
-    grep -ai "alias.*=\|function.*)" "$bash_source";
+    grep -ai "alias.*=\|function.*)" "$bash_source" | grep -i "$1";
   done;
 }
 
@@ -49,6 +50,31 @@ function bashe()
 {
   gedit $bash_android_sources;
   bashup;
+}
+
+# === Bashs Android 7.0 Editor ===
+function bashea()
+{
+  gedit $bash_android_dir/android_cyanogenmod_14.rc \
+        $bash_android_dir/android_google_aospn.rc \
+        $bash_android_dir/android_google.rc;
+  bashup;
+}
+
+# === Bashs Functions Editor ===
+function bashes()
+{
+  local files='';
+  for bash_source in $bash_android_sources;
+  do
+    grep -aiq "$1" "$bash_source";
+    if [ $? -eq 0 ]; then
+      files="$files $bash_source";
+    fi;
+  done;
+  if [ ! -z "$files" ]; then
+    gedit $files;
+  fi;
 }
 
 # === Bashs Syncer ===

@@ -75,6 +75,8 @@ function gitpushdrafts()
 
 # === Gerrit CyanogenMod ===
 alias gitpr='gitpushreview ssh://$gituserdefault@review.cyanogenmod.org:29418 CyanogenMod for';
+alias gitpr14='gitpushreview ssh://$gituserdefault@review.cyanogenmod.org:29418 CyanogenMod for cm-14.0';
+alias gitprs14='gitpushreview ssh://$gituserdefault@review.cyanogenmod.org:29418 CyanogenMod for staging/cm-14.0';
 alias gitprh='gitpushreview http://review.cyanogenmod.org CyanogenMod for';
 alias gitprd='gitpushdrafts ssh://$gituserdefault@review.cyanogenmod.org:29418 CyanogenMod';
 alias gitprdh='gitpushdrafts http://review.cyanogenmod.org CyanogenMod';
@@ -83,6 +85,8 @@ alias gitpbr='gitpushbypassreview ssh://$gituserdefault@review.cyanogenmod.org:2
 alias gitpgh='gitpushreview http://review.cyanogenmod.org CyanogenMod heads';
 alias gitprg='gitpr; gitpg';
 alias gitprgy='printf "y\ny\n" | gitpr; printf "y\ny" | gitpg';
+alias gitprds14='gitpushdrafts ssh://$gituserdefault@review.cyanogenmod.org:29418 CyanogenMod staging/cm-14.0';
+alias gitprd14='gitpushdrafts ssh://$gituserdefault@review.cyanogenmod.org:29418 CyanogenMod cm-14.0';
 
 # === Gerrit AICP ===
 alias gitpraicp='gitpushreview ssh://AdrianDC@gerrit.aicp-rom.com:29418 AICP for mm6.0';
